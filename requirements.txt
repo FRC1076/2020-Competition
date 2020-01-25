@@ -4,3 +4,4 @@ robotpy-hal==2020.1.2.2
 robotpy-wpilib-utilities==2020.0.1
 robotpy-halsim-gui==2020.1.2.1
 pygame
+robotpy-ctre==2020.0.1
