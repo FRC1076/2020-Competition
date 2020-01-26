@@ -40,7 +40,7 @@ def findObjectContours(dilate, objName):
     contoured_image = cv2.circle(contoured_image, obj_center, 3, (100, 0, 0), 2)
     cv2.imshow("contours", contoured_image)
     cv2.waitKey(0) #Waits long enough for image to load
-    
+
     # # Only proceed if contours were found
     # if(contours != None):
     #     if(len(contours) > 1):
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     #print (hex_dilate.shape)
     #hex_img = np.array([])
     #findObjectContours(img_dilate, "retroreflective")
-    capture_images(10)
+    capture_images(0)
     while True:
 
         continue
