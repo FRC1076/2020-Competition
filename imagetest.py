@@ -1,6 +1,6 @@
 # read and process an image
 # hi
-import cv2
+import cv2 #USE OPENCV 3.1 FOR FINDCONTOURS TO WORK
 import numpy as np
 
 displayImages =  True
@@ -24,7 +24,8 @@ def removeNoise(hsv_img, kernelSize, lower_color_range, upper_color_range):
 def findObjectContours(dilate, objName):
     # Find boundary of object
     dilcopy = dilate.copy()
-    contours, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #print(len(returns))
     con = contours[0]
     x, y, w, h = cv2.boundingRect(con)
     obj_center = (int(x+(w/2)), int(y+(h/2))) 
@@ -64,34 +65,37 @@ def findObjectContours(dilate, objName):
 def capture_images(device):
     webcam = cv2.VideoCapture(device)
     _, frame = webcam.read()
+
+    cv2.imwrite("test_images/frame1.jpg", img=frame)
     cv2.imshow("frame", frame)
     cv2.waitKey(0)
+    return frame
 if __name__ == "__main__":
     print("Imagetest main is running")
-    #bgr_img = cv2.imread("test_images/Green_Trapezoid.jpg")
+    capture_images(0)
+    bgr_img = cv2.imread("test_images/frame1.jpg")
     # cv2.imshow("Hello", bgr_img)
     # cv2.waitKey(5000) # keeps the window open for 5 seconds--long enough to load the image
     # Convert the frame to HSV
-    #hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
-    # cv2.imshow("Win1", bgr_img)
+    hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
+    #cv2.imshow("Win1", bgr_img)
 
-    # Find the cube
     #img_hsv_lower = np.array([70, 170, 30])
     #img_hsv_upper = np.array([90, 200, 50])
     #color = whiteboard_color = np.array([110,91,80])
     #color = green_color = np.array([34, 177, 76])
+    #color = retro_green = np.array([])
     #bound = 40
     #img_hsv_lower = np.array(color - bound)
     #img_hsv_upper = np.array(color + bound)
-    #img_hsv_lower = np.array([50, 170, 130])
-    #img_hsv_upper = np.array([180, 255, 225])
-    #img_dilate = removeNoise(bgr_img, (5,5), img_hsv_lower, img_hsv_upper)
-    #cv2.imshow("dilated image", img_dilate)
-    #cv2.waitKey(0)
+    img_hsv_lower = np.array([49, 70, 87]) #NOTE: opencv hsv is 0-179, 0-255, 0-255
+    img_hsv_upper = np.array([180, 255, 225])
+    img_dilate = removeNoise(bgr_img, (3,3), img_hsv_lower, img_hsv_upper)
+    cv2.imshow("dilated image", img_dilate)
+    cv2.waitKey(0)
     #print (hex_dilate.shape)
     #hex_img = np.array([])
-    #findObjectContours(img_dilate, "retroreflective")
-    capture_images(0)
+    findObjectContours(img_dilate, "retroreflective")
     while True:
 
         continue
