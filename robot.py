@@ -13,8 +13,8 @@ class Robot(wpilib.TimedRobot):
         self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(1)
 
-        self.left_side = createTalonAndFollower(robotmap.robot["LEFT_MASTER_ID"], robotmap.robot["LEFT_FOLLOWER_ID"])
-        self.right_side = createTalonAndFollower(robotmap.robot["RIGHT_MASTER_ID"], robotmap.robot["RIGHT_FOLLOWER_ID"])
+        self.left_side = wpilib.SpeedControllerGroup(robotmap.robot["LEFT_LEADER_ID"], robotmap.robot["LEFT_FOLLOWER_ID"])
+        self.right_side = wpilib.SpeedControllerGroup(robotmap.robot["RIGHT_LEADER_ID"], robotmap.robot["RIGHT_FOLLOWER_ID"])
 
         self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
@@ -38,16 +38,6 @@ class Robot(wpilib.TimedRobot):
         self.drivetrain.arcadeDrive(forward, rotation_value)
         
         #print(self.encoder.get())
-
-def createTalonAndFollower(MASTER, follower):
-    '''
-    First ID must be MASTER, Second ID must be follower talon
-    This assumes that the left and right sides are the same, two talons.
-    '''
-    master_talon = wpilib.Talon(MASTER)
-    follower_talon = wpilib.Talon(follower)
-    follower_talon.follow(master_talon)
-    return master_talon
 
 if __name__ == "__main__":
 	wpilib.run(Robot)
