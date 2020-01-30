@@ -28,13 +28,14 @@ class Robot(wpilib.TimedRobot):
         pass
 
     def teleopInit(self):
-        self.encoder = wpilib.Encoder(0,1)
-        # setup wheel diameter
+        #self.encoder = wpilib.Encoder(0,1)
+        #setup wheel diameter
         print("Teleop begins!")
 
     def teleopPeriodic(self):
         forward = self.driver.getRawAxis(5)
         rotation_value = self.driver.getX(LEFT_HAND)
+        #TODO: figure out for sure what drive type we're using
         self.drivetrain.arcadeDrive(forward, rotation_value)
         
         #print(self.encoder.get())
