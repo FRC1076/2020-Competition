@@ -2,7 +2,7 @@ import wpilib
 from wpilib.interfaces import GenericHID
 
 #This year, all IDs are stored in the robotmap
-import robotmap
+from robotmap import robot
 
 LEFT_HAND = GenericHID.Hand.kLeft
 RIGHT_HAND = GenericHID.Hand.kRight
@@ -13,8 +13,8 @@ class Robot(wpilib.TimedRobot):
         self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(1)
 
-        self.left_side = wpilib.SpeedControllerGroup(robotmap.robot["LEFT_LEADER_ID"], robotmap.robot["LEFT_FOLLOWER_ID"])
-        self.right_side = wpilib.SpeedControllerGroup(robotmap.robot["RIGHT_LEADER_ID"], robotmap.robot["RIGHT_FOLLOWER_ID"])
+        self.left_side = wpilib.SpeedControllerGroup(robot["LEFT_LEADER_ID"], robot["LEFT_FOLLOWER_ID"])
+        self.right_side = wpilib.SpeedControllerGroup(robot["RIGHT_LEADER_ID"], robot["RIGHT_FOLLOWER_ID"])
 
         self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
