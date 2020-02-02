@@ -2,6 +2,8 @@
 # hi
 import cv2 #USE OPENCV 3.1 FOR FINDCONTOURS TO WORK
 import numpy as np
+import math
+
 
 displayImages =  True
 
@@ -33,6 +35,12 @@ def findObjectContours(dilate, objName):
     img_center = (dilate.shape[1]/2, dilate.shape[0]/2)
     xydist = (obj_center[0]-img_center[0], obj_center[1] -img_center[1])
     print(str(xydist) + "x,y distances")
+    camera_fov = 56/360 * 2 * math.pi#on the low fov setting
+    angle_to_obj = (xydist[1]/dilate.shape[1])*camera_fov
+    obj_angle = (w/dilate.shape[1])*camera_fov#This is the degrees of fov taken up by the object
+    obj_width = 38 #inches
+    distance = (math.sin((math.pi -obj_angle)/2)/math.sin(obj_angle/2))*(obj_width/2)
+    print(distance)
     #moments = cv2.moments(con)
     #print(moments)
     print(str(len(contours)) + " -contour length")
@@ -40,9 +48,11 @@ def findObjectContours(dilate, objName):
     contoured_image = cv2.drawContours(dilcopy, contours, -1, (100,0,0), 2)
     contoured_image = cv2.rectangle(contoured_image, (x,y), (x+w, y+h), (100, 0, 0), 2)
     contoured_image = cv2.circle(contoured_image, obj_center, 3, (100, 0, 0), 2)
-    cv2.imshow("contours", contoured_image)
-    cv2.waitKey(1) #Waits long enough for image to load
-
+   # try:
+   #     cv2.imshow("contours", contoured_image)
+   #     cv2.waitKey(1) #Waits long enough for image to load
+   # except:
+   #     print("monitor not connected")
     # # Only proceed if contours were found
     # if(contours != None):
     #     if(len(contours) > 1):
@@ -68,9 +78,15 @@ def capture_images(device):
     _, frame = webcam.read()
 
     cv2.imwrite("test_images/frame1.jpg", img=frame)
-    cv2.imshow("frame", frame)
-    cv2.waitKey(1)
+    print("fooa")
+   # try:
+   #     cv2.imshow("frame", frame)
+   #     cv2.waitKey(1)
+   # except:
+   #     print("failed to show frame")
+    print("foobar")
     return frame
+
 if __name__ == "__main__":
     while True:
         print("Imagetest main is running")
@@ -81,7 +97,6 @@ if __name__ == "__main__":
         # Convert the frame to HSV
         hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
         #cv2.imshow("Win1", bgr_img)
-
         #img_hsv_lower = np.array([70, 170, 30])
         #img_hsv_upper = np.array([90, 200, 50])
         #color = whiteboard_color = np.array([110,91,80])
@@ -90,11 +105,14 @@ if __name__ == "__main__":
         #bound = 40
         #img_hsv_lower = np.array(color - bound)
         #img_hsv_upper = np.array(color + bound)
-        img_hsv_lower = np.array([5, 34, 15]) #NOTE: opencv hsv is 0-179, 0-255, 0-255
-        img_hsv_upper = np.array([100, 255, 225])
-        img_dilate = removeNoise(bgr_img, (1,1), img_hsv_lower, img_hsv_upper)
-        cv2.imshow("dilated image", img_dilate)
-        cv2.waitKey(1)
+        img_hsv_lower = np.array([5, 24, 5]) #NOTE: opencv hsv is 0-179, 0-255, 0-255
+        img_hsv_upper = np.array([180, 255, 225])
+        img_dilate = removeNoise(bgr_img, (5,5), img_hsv_lower, img_hsv_upper)
+       # try:
+       #     cv2.imshow("dilated image", img_dilate)
+       #     cv2.waitKey(1)
+       # except:
+       #     print("no monitor")
         #print (hex_dilate.shape)
         #hex_img = np.array([])
         findObjectContours(img_dilate, "retroreflective")
