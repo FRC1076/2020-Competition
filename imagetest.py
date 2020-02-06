@@ -3,9 +3,8 @@
 import cv2 #USE OPENCV 3.1 FOR FINDCONTOURS TO WORK
 import numpy as np
 import math
+from networktables import NetworkTables as nt
 
-
-displayImages =  True
 
 def removeNoise(hsv_img, kernelSize, lower_color_range, upper_color_range):
     # Kernal to use for removing noise
@@ -24,35 +23,53 @@ def removeNoise(hsv_img, kernelSize, lower_color_range, upper_color_range):
     #return dilate
     return no_noise
 
+
+
+
 def findObjectContours(dilate, objName):
     # Find boundary of object
     dilcopy = dilate.copy()
     _, contours, _ = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #print(len(returns))
-    con = contours[0] #Come back and make sure contours is not empty
-    x, y, w, h = cv2.boundingRect(con)
+    largest_contour = contours[0]
+    for con in contours:
+        if cv2.contourArea(con) > cv2.contourArea(largest_contour):
+            largest_contour = con
+    
+        
+    #Come back and make sure contours is not empty
+    
+    x, y, w, h = cv2.boundingRect(largest_contour)
     obj_center = (int(x+(w/2)), int(y)) 
     img_center = (dilate.shape[1]/2, dilate.shape[0]/2)
     xydist = (obj_center[0]-img_center[0], obj_center[1] -img_center[1])
     print(str(xydist) + "x,y distances")
+    
     camera_fov = 56/360 * 2 * math.pi#on the low fov setting
-    angle_to_obj = (xydist[1]/dilate.shape[1])*camera_fov
+    angle_to_obj = (xydist[0]/dilate.shape[1])*camera_fov
     obj_angle = (w/dilate.shape[1])*camera_fov#This is the degrees of fov taken up by the object
     obj_width = 38 #inches
     distance = (math.sin((math.pi -obj_angle)/2)/math.sin(obj_angle/2))*(obj_width/2)
-    print(distance)
+    distance = distance -.25*(117-distance) + 27 # To account for measured error
+    
+    print(str(distance) + "distance to target")
+    print(str(angle_to_obj)+ "Angle to object")
     #moments = cv2.moments(con)
     #print(moments)
+    
     print(str(len(contours)) + " -contour length")
     #print(contours)
     contoured_image = cv2.drawContours(dilcopy, contours, -1, (100,0,0), 2)
     contoured_image = cv2.rectangle(contoured_image, (x,y), (x+w, y+h), (100, 0, 0), 2)
     contoured_image = cv2.circle(contoured_image, obj_center, 3, (100, 0, 0), 2)
-   # try:
-   #     cv2.imshow("contours", contoured_image)
-   #     cv2.waitKey(1) #Waits long enough for image to load
-   # except:
-   #     print("monitor not connected")
+
+    return distance
+    return angle_to_obj
+    try:
+        cv2.imshow("contours", contoured_image)
+        cv2.waitKey(1) #Waits long enough for image to load
+    except:
+        print("monitor not connected")
     # # Only proceed if contours were found
     # if(contours != None):
     #     if(len(contours) > 1):
@@ -75,17 +92,22 @@ def findObjectContours(dilate, objName):
     #         return displayObject(contour_boundaries[-1], objName)
 def capture_images(device):
     webcam = cv2.VideoCapture(device)
+    
     _, frame = webcam.read()
 
     cv2.imwrite("test_images/frame1.jpg", img=frame)
-    print("fooa")
-   # try:
-   #     cv2.imshow("frame", frame)
-   #     cv2.waitKey(1)
-   # except:
-   #     print("failed to show frame")
-    print("foobar")
+    
+    try:
+        cv2.imshow("frame", frame)
+        cv2.waitKey(1)
+    except:
+        print("failed to show frame")
     return frame
+
+def send():
+
+
+
 
 if __name__ == "__main__":
     while True:
@@ -108,14 +130,14 @@ if __name__ == "__main__":
         img_hsv_lower = np.array([5, 24, 5]) #NOTE: opencv hsv is 0-179, 0-255, 0-255
         img_hsv_upper = np.array([180, 255, 225])
         img_dilate = removeNoise(bgr_img, (5,5), img_hsv_lower, img_hsv_upper)
-       # try:
-       #     cv2.imshow("dilated image", img_dilate)
-       #     cv2.waitKey(1)
-       # except:
-       #     print("no monitor")
+        try:
+            cv2.imshow("dilated image", img_dilate)
+            cv2.waitKey(1)
+        except:
+             print("no monitor")
         #print (hex_dilate.shape)
         #hex_img = np.array([])
-        findObjectContours(img_dilate, "retroreflective")
+        dist, angle = findObjectContours(img_dilate, "retroreflective")
         
 
     # # # Display the BGR image with found objects bounded by rectangles
