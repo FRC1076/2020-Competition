@@ -4,7 +4,7 @@ import numpy as np
 import math
 from networktables import NetworkTables as nt
 
-__DEBUG__ = True
+__DEBUG__ = False
 #use red camera fov if using the ps eye
 
 def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
@@ -52,10 +52,10 @@ def find_bounding_box(img, contour):
     expected_aspect_ratio = 17.5/39
     if (aspect_ratio <= expected_aspect_ratio*.8
         or aspect_ratio >= expected_aspect_ratio*1.2):
-        return -1, math.pi
+        return -1, -1, -1, -1
 
     if __DEBUG__:
-        contoured_image = cv2.drawContours(img, [contour], -1, (100,0,0), 2)
+        contoured_image = cv2.drawContours(img, [contour], -1, (100,0,0), 2) #not using original image
         contoured_image = cv2.rectangle(contoured_image, (x,y), (x+w, y+h), (100, 0, 0), 2)
         contoured_image = cv2.circle(contoured_image, (center_x, center_y), 3, (100, 0, 0), 2)
         
@@ -92,26 +92,6 @@ def find_distance_and_angle(img, w, h, center_x, center_y):
         
     return distance, angle_to_obj
 
-    # # Only proceed if contours were found
-    # if(contours != None):
-    #     if(len(contours) > 1):
-    #         sorted(contours, key=lambda contour: getApproximateArea(contour), reverse=True)
-    #         contour_boundaries = []
-    #         if True: # (len(contours) < 4):
-    #             contour_boundaries = [getContourBoundary(contours[0]), getContourBoundary(contours[1])]
-    #         else:
-    #             interesting_contours = contours[:4]
-    #             sorted(interesting_contours, key=lambda contour: abs(getCenterPoint(getContourBoundary(contour))[0] - frame_width/2))
-    #             contour_boundaries = [getContourBoundary(interesting_contours[0]), getContourBoundary(interesting_contours[1])]
-    #             # TODO: Add code to threshold area of contours
-    #             # print("Interesting contours type:", type(interesting_contours))
-    #         if sendPackets:
-    #             prepareForRoboRIO(contour_boundaries, objName)
-    #         else:
-    #             sendData(False, 0, 0, "")
-    #         for contour_boundary in contour_boundaries[:-1]:
-    #             displayObject(contour_boundary, objName)
-    #         return displayObject(contour_boundaries[-1], objName)
 def capture_images(device):
     webcam = cv2.VideoCapture(device)
     
@@ -126,48 +106,59 @@ def capture_images(device):
         print("failed to show frame")
     return frame
 
-#def send():
+def update_network_tables(distance, angle, table):
+    table.putNumber("distance", distance)
+    table.putNumber("angle", angle)
 
 
 
-
-if __name__ == "__main__":
+def start():
+    nt.initialize(server = "127.0.0.1")
+    target_info = nt.getTable("targetInfo")
     while True:
         print("Imagetest main is running")
         capture_images(0)
         bgr_img = cv2.imread("test_images/frame1.jpg")
-        # cv2.imshow("Hello", bgr_img)
-        # cv2.waitKey(5000) # keeps the window open for 5 seconds--long enough to load the image
+
         # Convert the frame to HSV
         hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
-        #cv2.imshow("Win1", bgr_img)
-        #img_hsv_lower = np.array([70, 170, 30])
-        #img_hsv_upper = np.array([90, 200, 50])
-        #color = whiteboard_color = np.array([110,91,80])
-        #color = green_color = np.array([34, 177, 76])
-        #color = retro_green = np.array([])
-        #bound = 40
-        #img_hsv_lower = np.array(color - bound)
-        #img_hsv_upper = np.array(color + bound)
-        img_hsv_lower = np.array([5, 24, 5]) #NOTE: opencv hsv is 0-179, 0-255, 0-255
-        img_hsv_upper = np.array([180, 255, 225])
-        binary_image = process_image(bgr_img, (5,5), img_hsv_lower, img_hsv_upper)
-        try:
-            cv2.imshow("dilated image", img_dilate)
-            cv2.waitKey(1)
-        except:
-             print("no monitor")
-        #print (hex_dilate.shape)
-        #hex_img = np.array([])
-        #dist, angle = findObjectContours(img_dilate)
+        
+        img_bgr_lower = np.array([5, 24, 5]) 
+        img_bgr_upper = np.array([180, 255, 225])
+        
+        binary_image = process_image(bgr_img, (5,5), img_bgr_lower, img_bgr_upper)
+
+
+        
+        if __DEBUG__:
+            try:
+                cv2.imshow("processed image", binary_image)
+                cv2.waitKey(1)
+            except:
+                print("failed to display proccessed image")
+
+
 
         target_contour = find_object(binary_image)
+        
         if (target_contour is None):
             continue
 
         width, height, center_x, center_y = find_bounding_box(binary_image, target_contour)
 
+        if width == -1:
+            continue
+        
         distance, angle = find_distance_and_angle(binary_image, width, height, center_x, center_y)
+        
+        update_network_tables(distance, angle, target_info)
+
+
+
+if __name__ == "__main__":
+    
+    start()
+
         
         
         
