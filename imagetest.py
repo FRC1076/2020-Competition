@@ -5,7 +5,7 @@ import numpy as np
 import math
 from networktables import NetworkTables as nt
 
-
+#use red camera fov
 def removeNoise(hsv_img, kernelSize, lower_color_range, upper_color_range):
     # Kernal to use for removing noise
     kernel = np.ones(kernelSize, np.uint8)
@@ -31,6 +31,7 @@ def findObjectContours(dilate, objName):
     dilcopy = dilate.copy()
     _, contours, _ = cv2.findContours(dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #print(len(returns))
+    
     largest_contour = contours[0]
     for con in contours:
         if cv2.contourArea(con) > cv2.contourArea(largest_contour):
@@ -63,13 +64,14 @@ def findObjectContours(dilate, objName):
     contoured_image = cv2.rectangle(contoured_image, (x,y), (x+w, y+h), (100, 0, 0), 2)
     contoured_image = cv2.circle(contoured_image, obj_center, 3, (100, 0, 0), 2)
 
-    return distance
-    return angle_to_obj
+
     try:
         cv2.imshow("contours", contoured_image)
         cv2.waitKey(1) #Waits long enough for image to load
     except:
         print("monitor not connected")
+        
+    return distance, angle_to_obj
     # # Only proceed if contours were found
     # if(contours != None):
     #     if(len(contours) > 1):
@@ -104,7 +106,7 @@ def capture_images(device):
         print("failed to show frame")
     return frame
 
-def send():
+#def send():
 
 
 
