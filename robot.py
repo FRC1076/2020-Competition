@@ -63,16 +63,12 @@ class Robot(wpilib.TimedRobot):
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
 
     def teleopPeriodic(self):
-       
         
-        
-        forward = self.driver.getRawAxis(5) #Right stick y-axis
-        forward = deadzone(forward, robotmap.deadzone)
-        
-        rotation_value = self.driver.getX(LEFT_HAND)
-        #TODO: figure out for sure what drive type we're using
-        self.drivetrain.arcadeDrive(forward, rotation_value)
-
+        # Tank Drive
+	      forwardLeft = deadzone(self.driver.getRawAxis(5)) #Left stick y-axis
+        forwardRight = deadzone(self.driver.getRawAxis(6)) #Right stick y-axis
+	
+        self.drivetrain.tankDrive(forwardLeft, forwardRight)
 
         #TODO: Refactor this
         if self.searchForColor:
@@ -80,9 +76,9 @@ class Robot(wpilib.TimedRobot):
                 self.colorSensorMotor.set(0.2)
             else:
                 self.colorSensorMotor.set(0)
-
-                
         
+	
+
 def deadzone(val, deadzone):
     """
     Given the deadzone value x, the deadzone both eliminates all
