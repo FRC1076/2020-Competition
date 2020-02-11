@@ -41,13 +41,11 @@ class Robot(wpilib.TimedRobot):
         pass
 
     def teleopPeriodic(self):
-        forwardLeft = self.driver.getRawAxis(5) #Left stick y-axis
-        forwardLeft = deadzone(forwardLeft, robotmap.deadzone)
-        forwardRight = self.driver.getRawAxis(6) #Right stick y-axis
-        forwardRight = deadzone(forwardRight, robotmap.deadzone)
-        #rotation_value = self.driver.getX(LEFT_HAND)
-        #TODO: figure out for sure what drive type we're using
-        #self.drivetrain.arcadeDrive(forward, rotation_value)
+        
+	# Tank Drive
+	forwardLeft = deadzone(self.driver.getRawAxis(5)) #Left stick y-axis
+        forwardRight = deadzone(self.driver.getRawAxis(6)) #Right stick y-axis
+	
         self.drivetrain.tankDrive(forwardLeft, forwardRight)
 
 def deadzone(val, deadzone):
