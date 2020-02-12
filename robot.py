@@ -10,15 +10,17 @@ from subsystems.rev_brushed import rev_brushed
 import rev
 
 #Controller hands (sides)
-LEFT_HAND = GenericHID.Hand.kLeft
-RIGHT_HAND = GenericHID.Hand.kRight
+#LEFT_HAND = GenericHID.Hand.kLeft
+#RIGHT_HAND = GenericHID.Hand.kRight
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
         #Controllers
-        self.driver = wpilib.XboxController(0)
-        self.operator = wpilib.XboxController(1)
+        #self.driver = wpilib.XboxController(0)
+        self.operator = wpilib.XboxController(0)
 
+
+        """
         #Motors
         self.left_side = wpilib.SpeedControllerGroup(robotmap.LEFT_LEADER_ID, robotmap.LEFT_FOLLOWER_ID)
         self.right_side = wpilib.SpeedControllerGroup(robotmap.RIGHT_LEADER_ID, robotmap.RIGHT_FOLLOWER_ID)
@@ -28,14 +30,15 @@ class Robot(wpilib.TimedRobot):
 
         #TODO: Add subsystems and sensors as the code is written
         #TODO: SmartDashboard
-
+        """
         # Color Sensor
         self.colorSensor = color_sensor()
-        self.colorSensorMotor = rev_brushed()
-        self.searchForColor = False
-        self.turnWheel = False
-
-
+        self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
+       
+        self.stopColorMap = {"r":"b", "y":"g", "b":"r", "g":"y"}
+        self.gameData = ""
+        
+        
         
         
 
@@ -50,6 +53,17 @@ class Robot(wpilib.TimedRobot):
         pass
 
     def teleopInit(self):
+        self.turnedAmount = 8
+
+        self.searchForColor = False
+
+        self.turnWheel = False
+        self.startColor = None
+
+        self.currentColor = None
+        self.lastColor = None
+
+   
         #TODO: Add encoders, other sensors
         # print("Teleop begins!")
         pass
@@ -62,26 +76,64 @@ class Robot(wpilib.TimedRobot):
         # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
 
+    def checkGameData(self):
+        gd = str(wpilib.DriverStation.getInstance().getGameSpecificMessage())
+        if(len(gd) > 0):
+            self.gameData = gd
+
     def teleopPeriodic(self):
        
         
         
-        forward = self.driver.getRawAxis(5) #Right stick y-axis
-        forward = deadzone(forward, robotmap.deadzone)
+        #forward = self.driver.getRawAxis(5) #Right stick y-axis
+        #forward = deadzone(forward, robotmap.deadzone)
         
-        rotation_value = self.driver.getX(LEFT_HAND)
+        #rotation_value = self.driver.getX(LEFT_HAND)
         #TODO: figure out for sure what drive type we're using
-        self.drivetrain.arcadeDrive(forward, rotation_value)
-
+        #self.drivetrain.arcadeDrive(forward, rotation_value)
+        self.checkGameData()
+            
 
         #TODO: Refactor this
         if self.searchForColor:
-            if self.colorSensor.checkColor():
+            if self.colorSensor.checkColor(self.gameData):
                 self.colorSensorMotor.set(0.2)
             else:
                 self.colorSensorMotor.set(0)
+                self.searchForColor = False
 
+        if self.operator.getXButton():
+            self.startColor = self.stopColorMap[self.colorSensor.getColorName(self.colorSensor.getColor())]
+            print(self.startColor)
+            self.lastColor = self.startColor
+            self.turnWheel = True
+            print("START!")
+
+        if self.operator.getAButton():
+            self.searchForColor = True
+
+        if self.turnWheel:
+            self.debugColorSensor()
+            self.colorSensorMotor.set(0.3)
+            self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
+            
+            if self.currentColor != self.lastColor:
+                if self.currentColor == self.startColor:
+                    self.turnedAmount -= 1
                 
+                if self.turnedAmount == 0:
+                    #if self.oneMoreTime:
+                    self.colorSensorMotor.set(0)
+                    self.turnWheel = False
+                    #else:
+                    #    self.oneMoreTime = True
+                       
+                    
+                    
+
+            print(self.turnedAmount)
+            self.lastColor = self.currentColor
+           
         
 def deadzone(val, deadzone):
     """
