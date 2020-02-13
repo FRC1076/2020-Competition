@@ -16,26 +16,45 @@ class color_sensor:
         """
 
         r = color.red
+        g = color.green
+        b = color.blue
+
+        if(r > g and r > b):
+            return "r"
+        elif(g > r and g > b):
+            return "y"
+        elif(g > b and g > r):
+            return "g"
+        elif(b > r and g > r):
+            return "b"
+        else:
+            raise NotImplementedError
+
+        
+        """
         if(r < 30):
             return "g"
         elif(r < 80):
             return "b"
-        elif(r < 200):
-            return "r"
         else:
-            return "y"
+            if(g < 100):
+                return "r"
+            else:
+                return "y"
+        """
+        
+        
 
     
 
-    def getGameData(self):
-        return self.gameData
+    
 
     def getColor(self):
         self.color = self.colorSensor.getRawColor()
         return self.color
         
 
-    def checkColor(self, goal):
-        return (self.getColorName(self.getColor()) != goal)
+    #def checkColor(self, goal):
+    #    return (self.getColorName(self.getColor()) != goal)
 
     

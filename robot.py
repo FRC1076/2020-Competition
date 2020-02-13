@@ -36,8 +36,8 @@ class Robot(wpilib.TimedRobot):
         self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
        
         self.stopColorMap = {"r":"b", "y":"g", "b":"r", "g":"y"}
-        self.gameData = ""
         
+        self.gameData = ""
         
         
         
@@ -47,12 +47,14 @@ class Robot(wpilib.TimedRobot):
         return
     
     def autonomousInit(self):
-        pass
+        self.gameData = ""
 
     def autonomousPeriodic(self):
         pass
 
     def teleopInit(self):
+        self.gameData = ""
+        self.goal = ""
         self.turnedAmount = 8
 
         self.searchForColor = False
@@ -62,7 +64,9 @@ class Robot(wpilib.TimedRobot):
 
         self.currentColor = None
         self.lastColor = None
-
+        
+        
+        self.found = False
    
         #TODO: Add encoders, other sensors
         # print("Teleop begins!")
@@ -75,16 +79,14 @@ class Robot(wpilib.TimedRobot):
         green = c.green
         # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
+        print(self.colorSensor.getColorName(c))
 
     def checkGameData(self):
-        gd = str(wpilib.DriverStation.getInstance().getGameSpecificMessage())
-        if(len(gd) > 0):
+        gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
+        if(gd != None and not self.searchForColor):
             self.gameData = gd
 
     def teleopPeriodic(self):
-       
-        
-        
         #forward = self.driver.getRawAxis(5) #Right stick y-axis
         #forward = deadzone(forward, robotmap.deadzone)
         
@@ -93,24 +95,47 @@ class Robot(wpilib.TimedRobot):
         #self.drivetrain.arcadeDrive(forward, rotation_value)
         self.checkGameData()
             
+        self.debugColorSensor()
+        
+        if self.operator.getAButtonPressed():
+            self.currentColor = None
+            self.lastColor = None
+            print(self.goal)
+            self.goal = self.stopColorMap[self.gameData]
+            self.searchForColor = True
+            
 
         #TODO: Refactor this
         if self.searchForColor:
-            if self.colorSensor.checkColor(self.gameData):
+            self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
+           
+            
+            
+            
+
+            if self.goal != self.currentColor:
                 self.colorSensorMotor.set(0.2)
             else:
-                self.colorSensorMotor.set(0)
-                self.searchForColor = False
+                #if self.vals[0] == self.vals[1] == self.vals[2] :
+                if self.goal == "g" and self.found == False:
+                    self.found = True
+                else:    
+                    self.colorSensorMotor.set(0)
+                    self.searchForColor = False
+                
 
-        if self.operator.getXButton():
+            
+
+        if self.operator.getXButtonPressed():
+            self.currentColor = None
+            self.lastColor = None
             self.startColor = self.stopColorMap[self.colorSensor.getColorName(self.colorSensor.getColor())]
             print(self.startColor)
             self.lastColor = self.startColor
             self.turnWheel = True
             print("START!")
 
-        if self.operator.getAButton():
-            self.searchForColor = True
+       
 
         if self.turnWheel:
             self.debugColorSensor()
@@ -118,6 +143,8 @@ class Robot(wpilib.TimedRobot):
             self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
             
             if self.currentColor != self.lastColor:
+                
+                print("Start Color: {} Current Color {}".format(self.startColor, self.currentColor))
                 if self.currentColor == self.startColor:
                     self.turnedAmount -= 1
                 
@@ -127,6 +154,8 @@ class Robot(wpilib.TimedRobot):
                     self.turnWheel = False
                     #else:
                     #    self.oneMoreTime = True
+            else:
+                print("Last Color: {} Current Color {}".format(self.self.lastColor, self.currentColor))
                        
                     
                     
