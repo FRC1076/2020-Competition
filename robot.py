@@ -9,6 +9,8 @@ from subsystems.color_sensor import color_sensor
 from subsystems.rev_brushed import rev_brushed
 import rev
 
+from rev.color import ColorMatch
+
 #Controller hands (sides)
 #LEFT_HAND = GenericHID.Hand.kLeft
 #RIGHT_HAND = GenericHID.Hand.kRight
@@ -35,12 +37,23 @@ class Robot(wpilib.TimedRobot):
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
        
-        self.stopColorMap = {"r":"b", "y":"g", "b":"r", "g":"y"}
+        self.stopColorMap = {"r":"g", "y":"r", "b":"y", "g":"b"}
         
         self.gameData = ""
+        self.colorMatch = ColorMatch()
         
+        self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
+        self.green = wpilib._wpilib.Color(0.197, 0.561, 0.240)
+        self.red = wpilib._wpilib.Color(0.561, 0.232, 0.144)
+        self.yellow = wpilib._wpilib.Color(0.361, 0.524, 0.133)
+
+        self.colorMap = {"b":self.blue, "g":self.green, "r":self.red, "y":self.yellow}
         
-        
+        self.colorMatch.addColorMatch(self.blue) #Blue
+            
+        self.colorMatch.addColorMatch(self.green) #Green
+        self.colorMatch.addColorMatch(self.red) #Red
+        self.colorMatch.addColorMatch(self.yellow)
 
 
     def robotPeriodic(self):
@@ -95,7 +108,12 @@ class Robot(wpilib.TimedRobot):
         #self.drivetrain.arcadeDrive(forward, rotation_value)
         self.checkGameData()
             
-        self.debugColorSensor()
+        #self.debugColorSensor()
+
+        #if self.operator.getBButtonPressed():
+            
+            #print(self.colorSensor.getWPIColor().red)
+            
         
         if self.operator.getAButtonPressed():
             self.currentColor = None
@@ -103,21 +121,22 @@ class Robot(wpilib.TimedRobot):
             print(self.goal)
             self.goal = self.stopColorMap[self.gameData]
             self.searchForColor = True
+            self.found = False
             
 
         #TODO: Refactor this
         if self.searchForColor:
-            self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
+            #self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
            
             
             
             
 
-            if self.goal != self.currentColor:
-                self.colorSensorMotor.set(0.2)
+            if self.colorMap[self.goal] != self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 1.0):
+                self.colorSensorMotor.set(0.25)
             else:
                 #if self.vals[0] == self.vals[1] == self.vals[2] :
-                if self.goal == "g" and self.found == False:
+                if self.found == False:
                     self.found = True
                 else:    
                     self.colorSensorMotor.set(0)

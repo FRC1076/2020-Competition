@@ -47,7 +47,8 @@ class color_sensor:
 
     
 
-    
+    def getWPIColor(self):
+        return self.colorSensor.getColor()
 
     def getColor(self):
         self.color = self.colorSensor.getRawColor()
