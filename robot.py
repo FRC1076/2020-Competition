@@ -10,8 +10,9 @@ from subsystems.rev_brushed import rev_brushed
 import rev
 
 #Controller hands (sides)
-LEFT_HAND = GenericHID.Hand.kLeft
-RIGHT_HAND = GenericHID.Hand.kRight
+LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
+RIGHT_HAND = wpilib._wpilib.XboxController.Hand.kRightHand
+
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
@@ -64,11 +65,12 @@ class Robot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         
-        # Tank Drive
-	      forwardLeft = deadzone(self.driver.getRawAxis(5)) #Left stick y-axis
-        forwardRight = deadzone(self.driver.getRawAxis(6)) #Right stick y-axis
-	
-        self.drivetrain.tankDrive(forwardLeft, forwardRight)
+        forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
+        forward = deadzone(forward, robotmap.deadzone)
+        
+        rotation_value = self.driver.getX(LEFT_HAND)
+	     
+        self.drivetrain.arcadeDrive(forward, rotation_value)
 
         #TODO: Refactor this
         if self.searchForColor:
