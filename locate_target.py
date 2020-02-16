@@ -99,11 +99,13 @@ def capture_images(device):
 
     cv2.imwrite("test_images/frame1.jpg", img=frame)
     
-    try:
-        cv2.imshow("frame", frame)
-        cv2.waitKey(1)
-    except:
-        print("failed to show frame")
+    if __DEBUG__: 
+        try:
+            cv2.imshow("frame", frame)
+            cv2.waitKey(1)
+        except:
+            print("failed to show frame")
+
     return frame
 
 def update_network_tables(distance, angle, table):
@@ -113,13 +115,13 @@ def update_network_tables(distance, angle, table):
 
 
 def start():
-    nt.initialize(server = "127.0.0.1")
+    nt.initialize(server = "10.10.76.2")
+    print("nt is initialized.")
     target_info = nt.getTable("targetInfo")
     while True:
         print("Imagetest main is running")
         capture_images(0)
         bgr_img = cv2.imread("test_images/frame1.jpg")
-
         # Convert the frame to HSV
         hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
         
@@ -150,7 +152,10 @@ def start():
             continue
         
         distance, angle = find_distance_and_angle(binary_image, width, height, center_x, center_y)
-        
+        if len(target_contour) > 0:
+            print("Found a contour")
+        else:
+            print("No contours!")
         update_network_tables(distance, angle, target_info)
 
 
