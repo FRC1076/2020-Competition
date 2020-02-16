@@ -3,6 +3,7 @@ import cv2 #USE OPENCV 3.1 FOR FINDCONTOURS TO WORK
 import numpy as np
 import math
 from networktables import NetworkTables as nt
+import datetime
 
 __DEBUG__ = False
 #use red camera fov if using the ps eye
@@ -115,7 +116,9 @@ def update_network_tables(distance, angle, table):
 def start():
     nt.initialize(server = "127.0.0.1")
     target_info = nt.getTable("targetInfo")
+    
     while True:
+        before = datetime.datetime.now()
         print("Imagetest main is running")
         capture_images(0)
         bgr_img = cv2.imread("test_images/frame1.jpg")
@@ -152,7 +155,10 @@ def start():
         distance, angle = find_distance_and_angle(binary_image, width, height, center_x, center_y)
         
         update_network_tables(distance, angle, target_info)
-
+        after = datetime.datetime.now()
+        
+        delay = before - after
+        print(str(delay) + " delay")
 
 
 if __name__ == "__main__":
