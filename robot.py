@@ -22,17 +22,18 @@ RIGHT_HAND = wpilib._wpilib.XboxController.Hand.kRightHand
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
         #Controllers
-        self.driver = wpilib.XboxController(0)
+        #self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(0)
 
 
         
         #Motors
-        self.left_side = wpilib.SpeedControllerGroup(robotmap.LEFT_LEADER_ID, robotmap.LEFT_FOLLOWER_ID)
-        self.right_side = wpilib.SpeedControllerGroup(robotmap.RIGHT_LEADER_ID, robotmap.RIGHT_FOLLOWER_ID)
+        
+        #self.left_side = wpilib.SpeedControllerGroup(robotmap.LEFT_LEADER_ID, robotmap.LEFT_FOLLOWER_ID)
+        #self.right_side = wpilib.SpeedControllerGroup(robotmap.RIGHT_LEADER_ID, robotmap.RIGHT_FOLLOWER_ID)
         
         #Drivetrain
-        self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
+        #self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
         #TODO: Add subsystems and sensors as the code is written
         #TODO: SmartDashboard
@@ -48,7 +49,7 @@ class Robot(wpilib.TimedRobot):
         self.setupColorSensor()
 
 
-    def setupColorSensor(self)
+    def setupColorSensor(self):
         self.colorMatch = ColorMatch()
         
         self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
@@ -151,14 +152,14 @@ class Robot(wpilib.TimedRobot):
     def teleopPeriodic(self):
 
         #Drive Train
-        forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
-        forward = deadzone(forward, robotmap.deadzone)
+        #forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
+        #forward = deadzone(forward, robotmap.deadzone)
         
-        rotation_value = self.driver.getX(LEFT_HAND)
+        #rotation_value = self.driver.getX(LEFT_HAND)
 	     
-        self.drivetrain.arcadeDrive(forward, rotation_value)
+        #self.drivetrain.arcadeDrive(forward, rotation_value)
         
-    
+        #Spin 1(3/4, ect) before seaerching for color
         
         #Color Sensor Stuff
         self.checkGameData()
