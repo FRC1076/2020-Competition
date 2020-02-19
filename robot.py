@@ -42,7 +42,7 @@ class Robot(wpilib.TimedRobot):
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
        
-        self.stopColorMap = {"r":"g", "y":"r", "b":"y", "g":"b"}
+        self.stopColorMap = {"r":"b", "y":"g", "b":"r", "g":"y"}
         
         self.gameData = ""
         
@@ -77,7 +77,7 @@ class Robot(wpilib.TimedRobot):
     def teleopInit(self):
         self.gameData = ""
         self.goal = ""
-        self.turnedAmount = 8
+        self.turnedAmount = 0
 
         self.searchForColor = False
 
@@ -94,14 +94,15 @@ class Robot(wpilib.TimedRobot):
         # print("Teleop begins!")
         pass
 
-    def debugColorSensor(self):
-        c = self.colorSensor.getColor()
-        red = c.red
-        blue = c.blue
-        green = c.green
+    def debugColorSensor(self, color=None):
+        if color is not None:
+            color = self.colorSensor.getColor()
+        red = color.red
+        blue = color.blue
+        green = color.green
         # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
-        print(self.colorSensor.getColorName(c))
+        #print(self.colorSensor.getColorName(color))
 
     def checkGameData(self):
         gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
@@ -110,6 +111,7 @@ class Robot(wpilib.TimedRobot):
 
 
     def turnWheelInit(self):
+        self.turnedAmount = 8
         self.currentColor = None
         self.lastColor = None
         self.startColor = self.stopColorMap[self.colorSensor.getColorName(self.colorSensor.getColor())]
@@ -132,22 +134,42 @@ class Robot(wpilib.TimedRobot):
 
         self.lastColor = self.currentColor
 
+    
+
     def searchColorInit(self):
         self.currentColor = None
         self.lastColor = None
         self.goal = self.stopColorMap[self.gameData]
         self.searchForColor = True
         self.found = False
+        self.timer = 0
 
     def searchColorCycle(self):
-        if self.colorMap[self.goal] != self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 1.0):
-            self.colorSensorMotor.set(0.25)
+       # print(self.timer)
+        if self.timer < 100:
+            self.timer += 1
+            self.colorSensorMotor.set(0.2)
         else:
-            if self.found == False:
-                self.found = True
-            else:    
-                self.colorSensorMotor.set(0)
-                self.searchForColor = False
+            color = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.9)
+            
+
+            print(color)
+            try:
+                print(color_sensor.getColorName(color))
+                if self.colorMap[self.goal] != color_sensor.getColorName(color):
+                    self.colorSensorMotor.set(0.2)
+                else:
+                    #if self.found == False:
+                    #    self.found = True
+                    #else:    
+                    self.colorSensorMotor.set(0)
+                    self.searchForColor = False
+            except TypeError as e:
+                print(e)
+                self.colorSensorMotor.set(0.2)
+                
+           
+                
 
     def teleopPeriodic(self):
 
@@ -163,6 +185,8 @@ class Robot(wpilib.TimedRobot):
         
         #Color Sensor Stuff
         self.checkGameData()
+
+        #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
 
         if self.operator.getAButtonPressed():
             self.searchColorInit()
