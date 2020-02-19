@@ -42,7 +42,7 @@ class Robot(wpilib.TimedRobot):
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
        
-        self.stopColorMap = {"r":"b", "y":"g", "b":"r", "g":"y"}
+        self.stopColorMap = {"R":"B", "Y":"G", "B":"R", "G":"Y"}
         
         self.gameData = ""
         
@@ -57,7 +57,12 @@ class Robot(wpilib.TimedRobot):
         self.red = wpilib._wpilib.Color(0.561, 0.232, 0.144)
         self.yellow = wpilib._wpilib.Color(0.361, 0.524, 0.133)
 
-        self.colorMap = {"b":self.blue, "g":self.green, "r":self.red, "y":self.yellow}
+        #self.blue = wpilib._wpilib.Color.kAqua
+        #self.green = wpilib._wpilib.Color.kLime
+        #self.red = wpilib._wpilib.Color.kRed
+        #self.yellow = wpilib._wpilib.Color.kYellow
+
+        self.colorMap = {"B":self.blue, "G":self.green, "R":self.red, "Y":self.yellow}
         
         self.colorMatch.addColorMatch(self.blue) #Blue
             
@@ -137,36 +142,54 @@ class Robot(wpilib.TimedRobot):
     
 
     def searchColorInit(self):
+        self.colorSensor.colorSensor.setGain(rev.color._rev_color.ColorSensorV3.GainFactor.k18x)
+        
         self.currentColor = None
         self.lastColor = None
         self.goal = self.stopColorMap[self.gameData]
+        self.goal = self.stopColorMap[self.goal]
+        #self.goal = self.gameData
         self.searchForColor = True
         self.found = False
         self.timer = 0
+        self.timer2 = 2
+        
 
     def searchColorCycle(self):
-       # print(self.timer)
+
         if self.timer < 100:
             self.timer += 1
             self.colorSensorMotor.set(0.2)
-        else:
-            color = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.9)
             
+        elif self.timer == 100:
+            self.currentColor = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 1)
+           
 
-            print(color)
-            try:
-                print(color_sensor.getColorName(color))
-                if self.colorMap[self.goal] != color_sensor.getColorName(color):
-                    self.colorSensorMotor.set(0.2)
-                else:
-                    #if self.found == False:
-                    #    self.found = True
-                    #else:    
+            self.timer +=1
+        else:
+
+            self.lastColor = self.currentColor
+
+            color = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95)
+            
+            self.currentColor = color
+
+
+            if self.lastColor == self.yellow and self.currentColor == self.green:
+                self.currentColor == self.yellow
+
+            if self.colorMap[self.goal] != color:
+                self.colorSensorMotor.set(0.2)
+            else:
+                
+                if self.timer2 == 0:
+                    print("STOP!!!!")    
                     self.colorSensorMotor.set(0)
                     self.searchForColor = False
-            except TypeError as e:
-                print(e)
-                self.colorSensorMotor.set(0.2)
+                else:
+                    self.timer2 -= 1
+
+            
                 
            
                 

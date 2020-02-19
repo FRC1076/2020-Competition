@@ -20,15 +20,15 @@ class color_sensor:
         b = color.blue
 
         if(r > g and r > b):
-            return "r"
-        elif(g > r and g > b):
-            return "y"
+            return "R"
+        elif(g > r and r > b):
+            return "Y"
         elif(g > b and g > r):
-            return "g"
+            return "G"
         elif(b > r and g > r):
-            return "b"
+            return "B"
         else:
-            raise NotImplementedError
+            return "w"
 
         
         """
