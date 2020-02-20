@@ -10,9 +10,11 @@ from rev.color import ColorMatch
 import robotmap
 
 
+
 #Subsystems
 from subsystems.color_sensor import color_sensor
-from subsystems.rev_brushed import rev_brushed
+import rev
+import wpilib.drive
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
@@ -22,23 +24,29 @@ RIGHT_HAND = wpilib._wpilib.XboxController.Hand.kRightHand
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
         #Controllers
-        #self.driver = wpilib.XboxController(0)
-        self.operator = wpilib.XboxController(0)
+        self.driver = wpilib.XboxController(0)
+        self.operator = wpilib.XboxController(1)
 
 
         
         #Motors
+
+        self.left_motor_1 = rev.CANSparkMax(robotmap.LEFT_LEADER_ID, rev.MotorType.kBrushed)
+        self.left_motor_2 = rev.CANSparkMax(robotmap.LEFT_FOLLOWER_ID, rev.MotorType.kBrushed)
+        self.right_motor_1 = rev.CANSparkMax(robotmap.RIGHT_LEADER_ID, rev.MotorType.kBrushed)
+        self.right_motor_2 = rev.CANSparkMax(robotmap.RIGHT_FOLLOWER_ID, rev.MotorType.kBrushed)
         
-        #self.left_side = wpilib.SpeedControllerGroup(robotmap.LEFT_LEADER_ID, robotmap.LEFT_FOLLOWER_ID)
-        #self.right_side = wpilib.SpeedControllerGroup(robotmap.RIGHT_LEADER_ID, robotmap.RIGHT_FOLLOWER_ID)
+        self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
+        self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
         
-        #Drivetrain
-        #self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
+        Drivetrain
+        self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
         #TODO: Add subsystems and sensors as the code is written
         #TODO: SmartDashboard
         
         # Color Sensor
+
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
        
@@ -47,6 +55,7 @@ class Robot(wpilib.TimedRobot):
         self.gameData = ""
         
         self.setupColorSensor()
+
 
 
     def setupColorSensor(self):
@@ -195,18 +204,14 @@ class Robot(wpilib.TimedRobot):
                 
 
     def teleopPeriodic(self):
-
-        #Drive Train
-        #forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
-        #forward = deadzone(forward, robotmap.deadzone)
+      
+        forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
+        forward = deadzone(forward, robotmap.deadzone)
         
-        #rotation_value = self.driver.getX(LEFT_HAND)
+        rotation_value = self.driver.getX(LEFT_HAND)
 	     
-        #self.drivetrain.arcadeDrive(forward, rotation_value)
-        
-        #Spin 1(3/4, ect) before seaerching for color
-        
-        #Color Sensor Stuff
+        self.drivetrain.arcadeDrive(forward, rotation_value)
+
         self.checkGameData()
 
         #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
@@ -222,8 +227,8 @@ class Robot(wpilib.TimedRobot):
 
         if self.turnWheel:
             self.turnWheelCycle()
-           
-        
+
+
 def deadzone(val, deadzone):
     """
     Given the deadzone value x, the deadzone both eliminates all
