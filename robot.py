@@ -56,6 +56,8 @@ class Robot(wpilib.TimedRobot):
         
         self.setupColorSensor()
 
+        self.hasTurnedWheel = False
+
 
 
     def setupColorSensor(self):
@@ -145,6 +147,7 @@ class Robot(wpilib.TimedRobot):
             if self.turnedAmount == 0:
                 self.colorSensorMotor.set(0)
                 self.turnWheel = False
+                self.hasTurnedWheel = True
 
         self.lastColor = self.currentColor
 
@@ -206,9 +209,9 @@ class Robot(wpilib.TimedRobot):
     def teleopPeriodic(self):
       
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
-        forward = deadzone(forward, robotmap.deadzone)
+        forward = 0.75 * deadzone(forward, robotmap.deadzone)
         
-        rotation_value = self.driver.getX(LEFT_HAND)
+        rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
 	     
         self.drivetrain.arcadeDrive(forward, rotation_value)
 
@@ -216,14 +219,20 @@ class Robot(wpilib.TimedRobot):
 
         #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
 
-        if self.operator.getAButtonPressed():
-            self.searchColorInit()
+
+        if self.operator.getBackButtonPressed():
+            if not self.hasTurnedWHeel():
+                self.turnWheelInit()
+            else:
+                self.searchColorInit()
+
+        if self.operator.getBackButton:
+            self.colorSensorMotor.set(0.1)
+        else:
+            self.colorSensorMotor.set(0)
 
         if self.searchForColor:
             self.searchColorCycle()
-
-        if self.operator.getXButtonPressed():
-            self.turnWheelInit()
 
         if self.turnWheel:
             self.turnWheelCycle()
