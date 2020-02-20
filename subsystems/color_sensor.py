@@ -7,7 +7,7 @@ class color_sensor:
     def __init__(self):
         self.colorSensor = ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.color = self.colorSensor.getRawColor()
-        self.gameData = ""
+        
 
     def getColorName(self, color):
         """
@@ -16,30 +16,46 @@ class color_sensor:
         """
 
         r = color.red
+        g = color.green
+        b = color.blue
+
+        if(r > g and r > b):
+            return "R"
+        elif(g > r and r > b):
+            return "Y"
+        elif(g > b and g > r):
+            return "G"
+        elif(b > r and g > r):
+            return "B"
+        else:
+            return "w"
+
+        
+        """
         if(r < 30):
             return "g"
         elif(r < 80):
             return "b"
-        elif(r < 200):
-            return "r"
         else:
-            return "y"
+            if(g < 100):
+                return "r"
+            else:
+                return "y"
+        """
+        
+        
 
-    def checkGameData(self):
-        gd = str(wpilib.DriverStation.getInstance().getGameSpecificMessage())
-        if(len(gd) > 0):
-            self.gameData = gd
+    
 
-    def getGameData(self):
-        return self.gameData
+    def getWPIColor(self):
+        return self.colorSensor.getColor()
 
     def getColor(self):
-        return self.color
-
-    def checkColor(self):
         self.color = self.colorSensor.getRawColor()
+        return self.color
+        
 
-    def checkColor(self):
-        return (self.getColorName(self.color) != self.gameData)
+    #def checkColor(self, goal):
+    #    return (self.getColorName(self.getColor()) != goal)
 
     

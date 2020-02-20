@@ -1,12 +1,18 @@
 import wpilib
 from wpilib.interfaces import GenericHID
+
+import rev
+from rev.color import ColorMatch
 #TODO: What else will we need for 2020?
 #TODO: Create and import subsystems (shooter, climb, etc.)
 
 #This year, all IDs are stored in the robotmap
 import robotmap
-#from subsystems.color_sensor import color_sensor
-from subsystems.rev_brushed import rev_brushed
+
+
+
+#Subsystems
+from subsystems.color_sensor import color_sensor
 import rev
 import wpilib.drive
 
@@ -21,7 +27,10 @@ class Robot(wpilib.TimedRobot):
         self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(1)
 
+
+        
         #Motors
+
         self.left_motor_1 = rev.CANSparkMax(robotmap.LEFT_LEADER_ID, rev.MotorType.kBrushed)
         self.left_motor_2 = rev.CANSparkMax(robotmap.LEFT_FOLLOWER_ID, rev.MotorType.kBrushed)
         self.right_motor_1 = rev.CANSparkMax(robotmap.RIGHT_LEADER_ID, rev.MotorType.kBrushed)
@@ -30,47 +39,172 @@ class Robot(wpilib.TimedRobot):
         self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
         self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
         
-        #Drivetrain
+        Drivetrain
         self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
         #TODO: Add subsystems and sensors as the code is written
         #TODO: SmartDashboard
-
+        
         # Color Sensor
-        #self.colorSensor = color_sensor()
-        #self.colorSensorMotor = rev_brushed()
-        #self.searchForColor = False
-        #self.turnWheel = False
 
-
+        self.colorSensor = color_sensor()
+        self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
+       
+        self.stopColorMap = {"R":"B", "Y":"G", "B":"R", "G":"Y"}
         
+        self.gameData = ""
         
+        self.setupColorSensor()
 
+
+
+    def setupColorSensor(self):
+        self.colorMatch = ColorMatch()
+        
+        self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
+        self.green = wpilib._wpilib.Color(0.197, 0.561, 0.240)
+        self.red = wpilib._wpilib.Color(0.561, 0.232, 0.144)
+        self.yellow = wpilib._wpilib.Color(0.361, 0.524, 0.133)
+
+        #self.blue = wpilib._wpilib.Color.kAqua
+        #self.green = wpilib._wpilib.Color.kLime
+        #self.red = wpilib._wpilib.Color.kRed
+        #self.yellow = wpilib._wpilib.Color.kYellow
+
+        self.colorMap = {"B":self.blue, "G":self.green, "R":self.red, "Y":self.yellow}
+        
+        self.colorMatch.addColorMatch(self.blue) #Blue
+            
+        self.colorMatch.addColorMatch(self.green) #Green
+        self.colorMatch.addColorMatch(self.red) #Red
+        self.colorMatch.addColorMatch(self.yellow)
 
     def robotPeriodic(self):
         return
     
     def autonomousInit(self):
-        pass
+        self.gameData = ""
 
     def autonomousPeriodic(self):
         pass
 
     def teleopInit(self):
+        self.gameData = ""
+        self.goal = ""
+        self.turnedAmount = 0
+
+        self.searchForColor = False
+
+        self.turnWheel = False
+        self.startColor = None
+
+        self.currentColor = None
+        self.lastColor = None
+        
+        
+        self.found = False
+   
         #TODO: Add encoders, other sensors
         # print("Teleop begins!")
         pass
 
-    def debugColorSensor(self):
-        c = self.colorSensor.getColor()
-        red = c.red
-        blue = c.blue
-        green = c.green
+    def debugColorSensor(self, color=None):
+        if color is not None:
+            color = self.colorSensor.getColor()
+        red = color.red
+        blue = color.blue
+        green = color.green
         # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
+        #print(self.colorSensor.getColorName(color))
+
+    def checkGameData(self):
+        gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
+        if(gd != None and not self.searchForColor):
+            self.gameData = gd
+
+
+    def turnWheelInit(self):
+        self.turnedAmount = 8
+        self.currentColor = None
+        self.lastColor = None
+        self.startColor = self.stopColorMap[self.colorSensor.getColorName(self.colorSensor.getColor())]
+        #print(self.startColor)
+        self.lastColor = self.startColor
+        self.turnWheel = True
+        #print("START!")
+    
+    def turnWheelCycle(self):
+        #self.debugColorSensor()
+        self.colorSensorMotor.set(0.3)
+        self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
+        
+        if self.currentColor != self.lastColor:            
+            if self.currentColor == self.startColor:
+                self.turnedAmount -= 1           
+            if self.turnedAmount == 0:
+                self.colorSensorMotor.set(0)
+                self.turnWheel = False
+
+        self.lastColor = self.currentColor
+
+    
+
+    def searchColorInit(self):
+        self.colorSensor.colorSensor.setGain(rev.color._rev_color.ColorSensorV3.GainFactor.k18x)
+        
+        self.currentColor = None
+        self.lastColor = None
+        self.goal = self.stopColorMap[self.gameData]
+        self.goal = self.stopColorMap[self.goal]
+        #self.goal = self.gameData
+        self.searchForColor = True
+        self.found = False
+        self.timer = 0
+        self.timer2 = 2
+        
+
+    def searchColorCycle(self):
+
+        if self.timer < 100:
+            self.timer += 1
+            self.colorSensorMotor.set(0.2)
+            
+        elif self.timer == 100:
+            self.currentColor = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 1)
+           
+
+            self.timer +=1
+        else:
+
+            self.lastColor = self.currentColor
+
+            color = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95)
+            
+            self.currentColor = color
+
+
+            if self.lastColor == self.yellow and self.currentColor == self.green:
+                self.currentColor == self.yellow
+
+            if self.colorMap[self.goal] != color:
+                self.colorSensorMotor.set(0.2)
+            else:
+                
+                if self.timer2 == 0:
+                    print("STOP!!!!")    
+                    self.colorSensorMotor.set(0)
+                    self.searchForColor = False
+                else:
+                    self.timer2 -= 1
+
+            
+                
+           
+                
 
     def teleopPeriodic(self):
-        
+      
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
         forward = deadzone(forward, robotmap.deadzone)
         
@@ -78,14 +212,22 @@ class Robot(wpilib.TimedRobot):
 	     
         self.drivetrain.arcadeDrive(forward, rotation_value)
 
-        #TODO: Refactor this
-        #if self.searchForColor:
-        #    if self.colorSensor.checkColor():
-        #        self.colorSensorMotor.set(0.2)
-        #    else:
-        #        self.colorSensorMotor.set(0)
-        
-	
+        self.checkGameData()
+
+        #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
+
+        if self.operator.getAButtonPressed():
+            self.searchColorInit()
+
+        if self.searchForColor:
+            self.searchColorCycle()
+
+        if self.operator.getXButtonPressed():
+            self.turnWheelInit()
+
+        if self.turnWheel:
+            self.turnWheelCycle()
+
 
 def deadzone(val, deadzone):
     """
