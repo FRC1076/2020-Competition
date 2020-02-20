@@ -35,6 +35,12 @@ class Robot(wpilib.TimedRobot):
         self.left_motor_2 = rev.CANSparkMax(robotmap.LEFT_FOLLOWER_ID, rev.MotorType.kBrushed)
         self.right_motor_1 = rev.CANSparkMax(robotmap.RIGHT_LEADER_ID, rev.MotorType.kBrushed)
         self.right_motor_2 = rev.CANSparkMax(robotmap.RIGHT_FOLLOWER_ID, rev.MotorType.kBrushed)
+
+        self.left_motor_1.setClosedLoopRampRate(1.0)
+        self.left_motor_2.setClosedLoopRampRate(1.0)
+        self.right_motor_1.setClosedLoopRampRate(1.0)
+        self.right_motor_2.setClosedLoopRampRate(1.0)
+
         
         self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
         self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
