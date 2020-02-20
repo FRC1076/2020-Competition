@@ -5,9 +5,10 @@ from wpilib.interfaces import GenericHID
 
 #This year, all IDs are stored in the robotmap
 import robotmap
-from subsystems.color_sensor import color_sensor
+#from subsystems.color_sensor import color_sensor
 from subsystems.rev_brushed import rev_brushed
 import rev
+import wpilib.drive
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
