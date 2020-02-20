@@ -21,8 +21,13 @@ class Robot(wpilib.TimedRobot):
         self.operator = wpilib.XboxController(1)
 
         #Motors
-        self.left_side = wpilib.SpeedControllerGroup(robotmap.LEFT_LEADER_ID, robotmap.LEFT_FOLLOWER_ID)
-        self.right_side = wpilib.SpeedControllerGroup(robotmap.RIGHT_LEADER_ID, robotmap.RIGHT_FOLLOWER_ID)
+        self.left_motor_1 = rev.CANSparkMax(robotmap.LEFT_LEADER_ID, rev.MotorType.kBrushed)
+        self.left_motor_2 = rev.CANSparkMax(robotmap.LEFT_FOLLOWER_ID, rev.MotorType.kBrushed)
+        self.right_motor_1 = rev.CANSparkMax(robotmap.RIGHT_LEADER_ID, rev.MotorType.kBrushed)
+        self.right_motor_2 = rev.CANSparkMax(robotmap.RIGHT_FOLLOWER_ID, rev.MotorType.kBrushed)
+        
+        self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
+        self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
         
         #Drivetrain
         self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
@@ -31,10 +36,10 @@ class Robot(wpilib.TimedRobot):
         #TODO: SmartDashboard
 
         # Color Sensor
-        self.colorSensor = color_sensor()
-        self.colorSensorMotor = rev_brushed()
-        self.searchForColor = False
-        self.turnWheel = False
+        #self.colorSensor = color_sensor()
+        #self.colorSensorMotor = rev_brushed()
+        #self.searchForColor = False
+        #self.turnWheel = False
 
 
         
@@ -73,11 +78,11 @@ class Robot(wpilib.TimedRobot):
         self.drivetrain.arcadeDrive(forward, rotation_value)
 
         #TODO: Refactor this
-        if self.searchForColor:
-            if self.colorSensor.checkColor():
-                self.colorSensorMotor.set(0.2)
-            else:
-                self.colorSensorMotor.set(0)
+        #if self.searchForColor:
+        #    if self.colorSensor.checkColor():
+        #        self.colorSensorMotor.set(0.2)
+        #    else:
+        #        self.colorSensorMotor.set(0)
         
 	
 
