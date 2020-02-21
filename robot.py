@@ -94,6 +94,8 @@ class Robot(wpilib.TimedRobot):
         self.gameData = ""
 
     def autonomousPeriodic(self):
+        #GO forward 10ft
+        #SHoot?
         pass
 
     def teleopInit(self):
@@ -226,11 +228,13 @@ class Robot(wpilib.TimedRobot):
         #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
 
 
-        if self.operator.getBackButtonPressed():
+        if self.operator.getStartButtonPressed():
             if not self.hasTurnedWHeel():
                 self.turnWheelInit()
             else:
                 self.searchColorInit()
+            
+        
 
         if self.operator.getBackButton:
             self.colorSensorMotor.set(0.1)
