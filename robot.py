@@ -156,10 +156,10 @@ class Robot(wpilib.TimedRobot):
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getBumperPressed(RIGHT_HAND) and self.driver.getBumperPressed(RIGHT_HAND):
+        if self.operator.getBumperPressed(RIGHT_HAND) < 0.8 and self.driver.getBumperPressed(RIGHT_HAND) < 0.8:
                 self.climberWinchMotor.set(0.3)
 
-        elif self.operator.getTriggerPressed(RIGHT_HAND) and self.driver.getTriggerPressed(RIGHT_HAND):
+        elif self.operator.getTriggerPressed(RIGHT_HAND) < 0.8 and self.driver.getTriggerPressed(RIGHT_HAND) < 0.8:
             self.climberWinchMotor.set(-0.3)
         else:
             self.climberWinchMotor.set(0)
@@ -266,6 +266,7 @@ class Robot(wpilib.TimedRobot):
 
         self.colorPistonUpdate()
         self.climberPistonUpdate()
+        self.climbWinchUpdate()
 
 
 def deadzone(val, deadzone): 
