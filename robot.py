@@ -56,6 +56,7 @@ class Robot(wpilib.TimedRobot):
         
         #Pneumatics
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
+        self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
         
 
         # Color Sensor
@@ -121,6 +122,7 @@ class Robot(wpilib.TimedRobot):
 
         #Pnrumatics piston state recorder
         self.colorArmIsExtended = False
+        self.climberArmIsExtended = False
 
 
         #TODO: Add encoders, other sensors
@@ -150,8 +152,17 @@ class Robot(wpilib.TimedRobot):
             else:
                 self.colorPiston.retract()
                 self.colorArmIsExtended = False
-       
- 
+
+    def climberPistonUpdate(self)  
+        if self.operator.getBumperPressed(LEFT_HAND) and self.driver.getBumperPressed(LEFT_HAND):
+            if not self.colorArmIsExtended:
+                self.climberPiston.extend()
+                self.climberArmIsExtended = True
+        
+        if self.operator.getTriggerPressed(LEFT_HAND) and self.driver.getTriggerPressed(LEFT_HAND):
+            if not self.colorArmIsExtended:
+                self.climberPiston.retract()
+                self.climberArmIsExtended = False
 
     def turnWheelInit(self):
         self.turnedAmount = 8
@@ -264,7 +275,8 @@ class Robot(wpilib.TimedRobot):
         if self.turnWheel:
             self.turnWheelCycle()
 
-
+        colorPistonUpdate(self)
+        climberPistonUpdate(self)
 def deadzone(val, deadzone):
     """
     Given the deadzone value x, the deadzone both eliminates all
