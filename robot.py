@@ -23,7 +23,6 @@ RIGHT_HAND = wpilib._wpilib.XboxController.Hand.kRightHand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
-        
         #Controllers
         self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(1)
@@ -66,7 +65,6 @@ class Robot(wpilib.TimedRobot):
 
 
     def setupColorSensor(self):
-
         self.colorMatch = ColorMatch()
         
         self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
@@ -83,24 +81,20 @@ class Robot(wpilib.TimedRobot):
 
 
     def robotPeriodic(self):
-
         return
     
 
     def autonomousInit(self):
-
         self.gameData = ""
 
 
     def autonomousPeriodic(self):
-
         #Go forward 10ft
         #Shoot?
         pass
 
 
     def teleopInit(self):
-
         self.gameData = ""
         self.goal = ""
         self.turnedAmount = 0
@@ -123,7 +117,6 @@ class Robot(wpilib.TimedRobot):
 
 
     def debugColorSensor(self, color=None):
-
         if color is not None:
             color = self.colorSensor.getColor()
         red = color.red
@@ -134,14 +127,12 @@ class Robot(wpilib.TimedRobot):
 
 
     def checkGameData(self):
-
         gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
         if(gd != None and not self.searchForColor):
             self.gameData = gd
 
 
     def colorPistonUpdate(self):
-
         if self.operator.getAButtonPressed():
             if not self.colorArmIsExtended:
                 self.colorPiston.extend()
@@ -152,7 +143,6 @@ class Robot(wpilib.TimedRobot):
 
 
     def climberPistonUpdate(self):  
-
         if self.operator.getBumperPressed(LEFT_HAND) and self.driver.getBumperPressed(LEFT_HAND):
             if not self.colorArmIsExtended:
                 self.climberPiston.extend()
@@ -165,7 +155,6 @@ class Robot(wpilib.TimedRobot):
 
 
     def turnWheelInit(self):
-
         self.turnedAmount = 8
         self.currentColor = None
         self.lastColor = None
@@ -175,7 +164,6 @@ class Robot(wpilib.TimedRobot):
 
     
     def turnWheelCycle(self):
-
         #self.debugColorSensor()
         self.colorSensorMotor.set(0.3)
         self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
@@ -192,7 +180,6 @@ class Robot(wpilib.TimedRobot):
 
     
     def searchColorInit(self):
-
         self.colorSensor.colorSensor.setGain(rev.color._rev_color.ColorSensorV3.GainFactor.k18x)
         self.currentColor = None
         self.lastColor = None
@@ -206,7 +193,6 @@ class Robot(wpilib.TimedRobot):
         
 
     def searchColorCycle(self):
-
         if self.timer < 100:
             self.timer += 1
             self.colorSensorMotor.set(0.2)
@@ -241,7 +227,6 @@ class Robot(wpilib.TimedRobot):
             
                 
     def teleopPeriodic(self):
-      
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
         
@@ -272,7 +257,7 @@ class Robot(wpilib.TimedRobot):
         self.climberPistonUpdate()
 
 
-def deadzone(val, deadzone):
+def deadzone(val, deadzone): 
     """
     Given the deadzone value x, the deadzone both eliminates all
     values between -x and x, and scales the remaining values from
