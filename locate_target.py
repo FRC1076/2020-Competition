@@ -1,11 +1,13 @@
-
 import cv2 #USE OPENCV 3.1 FOR FINDCONTOURS TO WORK
 import numpy as np
 import math
 from networktables import NetworkTables as nt
 import datetime
+import os
 
 __DEBUG__ = False
+__DEBUG_REMOTE_PI__ = False
+
 #use red camera fov if using the ps eye
 
 def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
@@ -13,7 +15,6 @@ def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
     kernel = np.ones(kernelSize, np.uint8)
     # Convert image to binary
     mask = cv2.inRange(hsv_img, lower_color_range, upper_color_range)
-
     #remove noisy parts of the image
     close_gaps = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
     no_noise = cv2.morphologyEx(close_gaps, cv2.MORPH_OPEN, kernel)
@@ -51,9 +52,9 @@ def find_bounding_box(img, contour):
     # reject all weird aspect ratios (too tall or flat)
     aspect_ratio = h/w
     expected_aspect_ratio = 17.5/39
-    if (aspect_ratio <= expected_aspect_ratio*.8
-        or aspect_ratio >= expected_aspect_ratio*1.2):
-        return -1, -1, -1, -1
+    # if (aspect_ratio <= expected_aspect_ratio*.8
+    #     or aspect_ratio >= expected_aspect_ratio*1.2):
+    #     return -1, -1, -1, -1
 
     if __DEBUG__:
         contoured_image = cv2.drawContours(img, [contour], -1, (100,0,0), 2) #not using original image
@@ -98,7 +99,10 @@ def capture_images(device):
     
     _, frame = webcam.read()
 
-    cv2.imwrite("test_images/frame1.jpg", img=frame)
+    if __DEBUG_REMOTE_PI__:
+        print("Read image", frame.shape)
+
+    cv2.imwrite("/home/pi/test_images/frame1.jpg", img=frame)
     
     if __DEBUG__: 
         try:
@@ -110,21 +114,33 @@ def capture_images(device):
     return frame
 
 def update_network_tables(distance, angle, table):
+    if __DEBUG_REMOTE_PI__:
+        print("updating network tables", distance, angle)
+
     table.putNumber("distance", distance)
     table.putNumber("angle", angle)
 
 
-
+def camera_params(): #Only works on linux
+    set_camera_params = "v4l2-ctl -d /dev/video0 --set-ctrl=white_balance_automatic=0,exposure=1,contrast=30,gain_automatic=0,auto_exposure=1"
+#   while == os.system(set_camera_params):
+#
+#       continue
+    os.system(set_camera_params)
 def start():
     nt.initialize(server = "10.10.76.2")
     print("nt is initialized.")
+    
     target_info = nt.getTable("targetInfo")
     
+    camera_params()
+
     while True:
         before = datetime.datetime.now()
         print("Imagetest main is running")
         capture_images(0)
-        bgr_img = cv2.imread("test_images/frame1.jpg")
+        bgr_img = cv2.imread("/home/pi/test_images/frame1.jpg")
+        # print(bgr_img)
         # Convert the frame to HSV
         hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
         
@@ -134,7 +150,7 @@ def start():
         binary_image = process_image(bgr_img, (5,5), img_bgr_lower, img_bgr_upper)
 
 
-        
+
         if __DEBUG__:
             try:
                 cv2.imshow("processed image", binary_image)
@@ -145,20 +161,29 @@ def start():
 
 
         target_contour = find_object(binary_image)
+
+        if __DEBUG_REMOTE_PI__:
+            if target_contour is not None:
+                print("Found a contour", target_contour.shape)
+                print(target_contour)
+            else:
+                print("No contours!")
         
         if (target_contour is None):
             continue
 
         width, height, center_x, center_y = find_bounding_box(binary_image, target_contour)
 
+
+        if __DEBUG_REMOTE_PI__:
+            print("Bounding box is", width, height)
+
+
         if width == -1:
             continue
         
         distance, angle = find_distance_and_angle(binary_image, width, height, center_x, center_y)
-        if len(target_contour) > 0:
-            print("Found a contour")
-        else:
-            print("No contours!")
+
         update_network_tables(distance, angle, target_info)
         after = datetime.datetime.now()
         
