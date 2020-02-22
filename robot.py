@@ -4,14 +4,11 @@ from wpilib.interfaces import GenericHID
 import rev
 from rev.color import ColorMatch
 
-
 #TODO: What else will we need for 2020?
 #TODO: Create and import subsystems (shooter, climb, etc.)
 
 #This year, all IDs are stored in the robotmap
 import robotmap
-
-
 
 #Subsystems
 from subsystems.pneumatics_system import pneumatic_system
@@ -26,14 +23,12 @@ RIGHT_HAND = wpilib._wpilib.XboxController.Hand.kRightHand
 
 class Robot(wpilib.TimedRobot):
     def robotInit(self):
+        
         #Controllers
         self.driver = wpilib.XboxController(0)
         self.operator = wpilib.XboxController(1)
 
-
-        
         #Motors
-
         self.left_motor_1 = rev.CANSparkMax(robotmap.LEFT_LEADER_ID, rev.MotorType.kBrushed)
         self.left_motor_2 = rev.CANSparkMax(robotmap.LEFT_FOLLOWER_ID, rev.MotorType.kBrushed)
         self.right_motor_1 = rev.CANSparkMax(robotmap.RIGHT_LEADER_ID, rev.MotorType.kBrushed)
@@ -43,7 +38,6 @@ class Robot(wpilib.TimedRobot):
         self.left_motor_2.setClosedLoopRampRate(1.0)
         self.right_motor_1.setClosedLoopRampRate(1.0)
         self.right_motor_2.setClosedLoopRampRate(1.0)
-
         
         self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
         self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
@@ -58,9 +52,7 @@ class Robot(wpilib.TimedRobot):
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
         self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
         
-
         # Color Sensor
-
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev.CANSparkMax(robotmap.COLOR_SENSOR_MOTOR, rev.MotorType.kBrushed)
        
@@ -73,8 +65,8 @@ class Robot(wpilib.TimedRobot):
         self.hasTurnedWheel = False
 
 
-
     def setupColorSensor(self):
+
         self.colorMatch = ColorMatch()
         
         self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
@@ -82,31 +74,33 @@ class Robot(wpilib.TimedRobot):
         self.red = wpilib._wpilib.Color(0.561, 0.232, 0.144)
         self.yellow = wpilib._wpilib.Color(0.361, 0.524, 0.133)
 
-        #self.blue = wpilib._wpilib.Color.kAqua
-        #self.green = wpilib._wpilib.Color.kLime
-        #self.red = wpilib._wpilib.Color.kRed
-        #self.yellow = wpilib._wpilib.Color.kYellow
-
         self.colorMap = {"B":self.blue, "G":self.green, "R":self.red, "Y":self.yellow}
         
-        self.colorMatch.addColorMatch(self.blue) #Blue
-            
-        self.colorMatch.addColorMatch(self.green) #Green
-        self.colorMatch.addColorMatch(self.red) #Red
+        self.colorMatch.addColorMatch(self.blue)
+        self.colorMatch.addColorMatch(self.green)
+        self.colorMatch.addColorMatch(self.red)
         self.colorMatch.addColorMatch(self.yellow)
 
+
     def robotPeriodic(self):
+
         return
     
+
     def autonomousInit(self):
+
         self.gameData = ""
 
+
     def autonomousPeriodic(self):
-        #GO forward 10ft
-        #SHoot?
+
+        #Go forward 10ft
+        #Shoot?
         pass
 
+
     def teleopInit(self):
+
         self.gameData = ""
         self.goal = ""
         self.turnedAmount = 0
@@ -119,19 +113,17 @@ class Robot(wpilib.TimedRobot):
         self.currentColor = None
         self.lastColor = None
         
-        
         self.found = False
 
-        #Pnrumatics piston state recorder
+        #Pneumatics piston state recorder
         self.colorArmIsExtended = False
         self.climberArmIsExtended = False
 
-
         #TODO: Add encoders, other sensors
-        # print("Teleop begins!")
-        pass
+
 
     def debugColorSensor(self, color=None):
+
         if color is not None:
             color = self.colorSensor.getColor()
         red = color.red
@@ -139,14 +131,17 @@ class Robot(wpilib.TimedRobot):
         green = color.green
         # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
-        #print(self.colorSensor.getColorName(color))
+
 
     def checkGameData(self):
+
         gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
         if(gd != None and not self.searchForColor):
             self.gameData = gd
 
+
     def colorPistonUpdate(self):
+
         if self.operator.getAButtonPressed():
             if not self.colorArmIsExtended:
                 self.colorPiston.extend()
@@ -155,28 +150,32 @@ class Robot(wpilib.TimedRobot):
                 self.colorPiston.retract()
                 self.colorArmIsExtended = False
 
-    def climberPistonUpdate(self)  
+
+    def climberPistonUpdate(self):  
+
         if self.operator.getBumperPressed(LEFT_HAND) and self.driver.getBumperPressed(LEFT_HAND):
             if not self.colorArmIsExtended:
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
-        
-        if self.operator.getTriggerPressed(LEFT_HAND) and self.driver.getTriggerPressed(LEFT_HAND):
-            if not self.colorArmIsExtended:
+
+        elif self.operator.getTriggerPressed(LEFT_HAND) and self.driver.getTriggerPressed(LEFT_HAND):
+            if self.colorArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
+
     def turnWheelInit(self):
+
         self.turnedAmount = 8
         self.currentColor = None
         self.lastColor = None
         self.startColor = self.stopColorMap[self.colorSensor.getColorName(self.colorSensor.getColor())]
-        #print(self.startColor)
         self.lastColor = self.startColor
         self.turnWheel = True
-        #print("START!")
+
     
     def turnWheelCycle(self):
+
         #self.debugColorSensor()
         self.colorSensorMotor.set(0.3)
         self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
@@ -192,10 +191,9 @@ class Robot(wpilib.TimedRobot):
         self.lastColor = self.currentColor
 
     
-
     def searchColorInit(self):
+
         self.colorSensor.colorSensor.setGain(rev.color._rev_color.ColorSensorV3.GainFactor.k18x)
-        
         self.currentColor = None
         self.lastColor = None
         self.goal = self.stopColorMap[self.gameData]
@@ -215,9 +213,8 @@ class Robot(wpilib.TimedRobot):
             
         elif self.timer == 100:
             self.currentColor = self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 1)
-           
-
             self.timer +=1
+
         else:
 
             self.lastColor = self.currentColor
@@ -226,14 +223,14 @@ class Robot(wpilib.TimedRobot):
             
             self.currentColor = color
 
-
             if self.lastColor == self.yellow and self.currentColor == self.green:
                 self.currentColor == self.yellow
 
             if self.colorMap[self.goal] != color:
                 self.colorSensorMotor.set(0.2)
+
             else:
-                
+
                 if self.timer2 == 0:
                     print("STOP!!!!")    
                     self.colorSensorMotor.set(0)
@@ -243,9 +240,6 @@ class Robot(wpilib.TimedRobot):
 
             
                 
-           
-                
-
     def teleopPeriodic(self):
       
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
@@ -257,17 +251,12 @@ class Robot(wpilib.TimedRobot):
 
         self.checkGameData()
 
-        #print(self.colorMatch.matchClosestColor(self.colorSensor.getWPIColor(), 0.95))
-
-
         if self.operator.getStartButtonPressed():
             if not self.hasTurnedWHeel():
                 self.turnWheelInit()
             else:
                 self.searchColorInit()
             
-        
-
         if self.operator.getBackButton:
             self.colorSensorMotor.set(0.1)
         else:
@@ -279,8 +268,10 @@ class Robot(wpilib.TimedRobot):
         if self.turnWheel:
             self.turnWheelCycle()
 
-        colorPistonUpdate(self)
-        climberPistonUpdate(self)
+        self.colorPistonUpdate()
+        self.climberPistonUpdate()
+
+
 def deadzone(val, deadzone):
     """
     Given the deadzone value x, the deadzone both eliminates all
@@ -295,6 +286,7 @@ def deadzone(val, deadzone):
     else:
         x = ((val - deadzone)/(1-deadzone))
         return (x)
+
 
 if __name__ == "__main__":
 	wpilib.run(Robot)
