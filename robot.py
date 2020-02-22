@@ -148,7 +148,7 @@ class Robot(wpilib.TimedRobot):
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
 
-        elif self.operator.getTriggerPressed(LEFT_HAND) and self.driver.getTriggerPressed(LEFT_HAND):
+        elif self.operator.getTriggerAxis(LEFT_HAND) > 0.8 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
             if self.colorArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
