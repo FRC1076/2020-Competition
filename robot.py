@@ -14,7 +14,7 @@ import robotmap
 
 
 #Subsystems
-from subsystems.pneumatics_system import pneumatics_system
+from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
 import rev
 import wpilib.drive
@@ -55,13 +55,13 @@ class Robot(wpilib.TimedRobot):
         #TODO: SmartDashboard
         
         #Pneumatics
-        self.colorPiston = pneumatics_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
+        self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
         
 
         # Color Sensor
 
         self.colorSensor = color_sensor()
-        self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
+        self.colorSensorMotor = rev.CANSparkMax(robotmap.COLOR_SENSOR_MOTOR, rev.MotorType.kBrushed)
        
         self.stopColorMap = {"R":"B", "Y":"G", "B":"R", "G":"Y"}
         
@@ -144,9 +144,12 @@ class Robot(wpilib.TimedRobot):
 
     def colorPistonUpdate(self):
         if self.operator.getAButtonPressed():
-            if self.colorArmIsExtended:
-                self.colorPiston.extend
-            else self.colorPiston.retract
+            if not self.colorArmIsExtended:
+                self.colorPiston.extend()
+                self.colorArmIsExtended = True
+            else:
+                self.colorPiston.retract()
+                self.colorArmIsExtended = False
        
  
 

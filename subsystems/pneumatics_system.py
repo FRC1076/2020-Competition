@@ -1,6 +1,6 @@
 #PNEUMATICS SYSTEM FOR FIRST ROBOTICS 2020 COMPETITION
 #The area below the main code contains the solenoids used for our 'bot
-
+import wpilib
 
 
 # RoboFoot 2: Now colorArm! ( code copied and edited from WAPUR 2020 )
@@ -11,10 +11,10 @@ class pneumatic_system:
         self.piston = piston
 
     def retract(self):
-        self.piston.set(RoboFoot.stateRetract)
+        self.piston.set(pneumatic_system.stateRetract)
     
     def extend(self):
-        self.piston.set(RoboFoot.stateExtend)
+        self.piston.set(pneumatic_system.stateExtend)
 
 
         ''' SOLENOID LIST
@@ -24,3 +24,4 @@ class pneumatic_system:
 
 
         Define Code: self.piston = pneuamtic_system(wpilib.DoubleSolenoid(PNCANID, RFForward, RFReverse))
+        '''
