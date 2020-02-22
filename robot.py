@@ -3,6 +3,8 @@ from wpilib.interfaces import GenericHID
 
 import rev
 from rev.color import ColorMatch
+
+
 #TODO: What else will we need for 2020?
 #TODO: Create and import subsystems (shooter, climb, etc.)
 
@@ -12,6 +14,7 @@ import robotmap
 
 
 #Subsystems
+from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
 import rev
 import wpilib.drive
@@ -45,16 +48,20 @@ class Robot(wpilib.TimedRobot):
         self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
         self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
         
-        Drivetrain
+        #Drivetrain
         self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
 
         #TODO: Add subsystems and sensors as the code is written
         #TODO: SmartDashboard
         
+        #Pneumatics
+        self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
+        
+
         # Color Sensor
 
         self.colorSensor = color_sensor()
-        self.colorSensorMotor = rev_brushed(robotmap.COLOR_SENSOR_MOTOR)
+        self.colorSensorMotor = rev.CANSparkMax(robotmap.COLOR_SENSOR_MOTOR, rev.MotorType.kBrushed)
        
         self.stopColorMap = {"R":"B", "Y":"G", "B":"R", "G":"Y"}
         
@@ -113,7 +120,11 @@ class Robot(wpilib.TimedRobot):
         
         
         self.found = False
-   
+
+        #Pnrumatics piston state recorder
+        self.colorArmIsExtended = False
+
+
         #TODO: Add encoders, other sensors
         # print("Teleop begins!")
         pass
@@ -133,6 +144,16 @@ class Robot(wpilib.TimedRobot):
         if(gd != None and not self.searchForColor):
             self.gameData = gd
 
+    def colorPistonUpdate(self):
+        if self.operator.getAButtonPressed():
+            if not self.colorArmIsExtended:
+                self.colorPiston.extend()
+                self.colorArmIsExtended = True
+            else:
+                self.colorPiston.retract()
+                self.colorArmIsExtended = False
+       
+ 
 
     def turnWheelInit(self):
         self.turnedAmount = 8
