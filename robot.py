@@ -155,16 +155,15 @@ class Robot(wpilib.TimedRobot):
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
-    def climbWinchUpdate(self) {
+    def climbWinchUpdate(self):
         if self.operator.getBumperPressed(RIGHT_HAND) and self.driver.getBumperPressed(RIGHT_HAND):
                 self.climberWinchMotor.set(0.3)
 
         elif self.operator.getTriggerPressed(RIGHT_HAND) and self.driver.getTriggerPressed(RIGHT_HAND):
-                self.climberWinchMotor.set(-0.3)
-        else self.climberWinchMotor.set(0)
+            self.climberWinchMotor.set(-0.3)
+        else:
+            self.climberWinchMotor.set(0)
 
-
-    }
 
     def turnWheelInit(self):
         self.turnedAmount = 8
