@@ -5,18 +5,34 @@ from networktables import NetworkTables as nt
 import datetime
 import os
 
-__DEBUG__ = True
-__DEBUG_REMOTE_PI__ = False
+__DEBUG__ = False
+__DEBUG_REMOTE_PI__ = True
+
 remote_pi_image_location = "/home/pi/test_images/frame1.jpg"
 fisheye_pi_image_location = "/home/pi/dev/cvon3/2020-Competition/test_images/frame1.jpg"
-image_location = fisheye_pi_image_location
+image_location = remote_pi_image_location
+
+DISTANCE_KEY = "DISTANCE"
+ANGLE_KEY = "ANGLE"
+CAMERA_CONNECTED_KEY = "CAMERA_CONNECTED"
+RECEVING_IMAGES_KEY = "RECEIVING_IMAGES"
+CONTOURS_FOUND_KEY = "CONTOURS_FOUND"
+TARGET_IN_FRAME_KEY = "TARGET_FOUND"
+
+NT_ADDRESS = "10.10.76.2"
+NT_VISON_TABLE_NAME = "VISION"
+NT_HANDLE = None
+
+
 #use red camera fov if using the ps eye
 
 def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
     # Kernal to use for removing noise
     kernel = np.ones(kernelSize, np.uint8)
+
     # Convert image to binary
     mask = cv2.inRange(hsv_img, lower_color_range, upper_color_range)
+    
     #remove noisy parts of the image
     close_gaps = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
     no_noise = cv2.morphologyEx(close_gaps, cv2.MORPH_OPEN, kernel)
@@ -27,6 +43,8 @@ def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
 def find_object(img):
     # Find boundary of object
     _, contours, _ = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    update_network_tables(CONTOURS_FOUND_KEY, len(contours))
 
     #runs if no contours are found
     if len(contours) == 0:
@@ -94,7 +112,6 @@ def find_distance_and_angle(img, w, h, center_x, center_y):
         print(str(distance) + "distance to target")
         print(str(angle_to_obj)+ "Angle to object")
 
-        
     return distance, angle_to_obj
 
 def capture_images(device):
@@ -117,13 +134,30 @@ def capture_images(device):
     
     return frame
 
-def update_network_tables(distance, angle, table):
+def init_network_tables():
+    global NT_HANDLE
+    nt.initialize(server = NT_ADDRESS)
+    print("nt is initialized. server is", NT_ADDRESS)    
+    NT_HANDLE = nt.getTable(NT_VISON_TABLE_NAME)
+
+def update_network_tables(key, value):
+    global NT_HANDLE
+
+    print("updating", key, value, type(value))
+
+    if NT_HANDLE is not None:
+        NT_HANDLE.putNumber(key, value)
+        print("wrote to nt:", key, value)
+    else: 
+        print("no network table handle")
+
+def update_distance_angle(distance, angle):
     if __DEBUG_REMOTE_PI__:
         print("updating network tables", distance, angle)
 
-    table.putNumber("distance", distance)
-    table.putNumber("angle", angle)
-
+    update_network_tables(DISTANCE_KEY, distance)
+    update_network_tables(ANGLE_KEY, angle)
+    
 
 def camera_params(): #Only works on linux
     set_camera_params = "v4l2-ctl -d /dev/video0 --set-ctrl=white_balance_automatic=0,exposure=1,contrast=30,gain_automatic=0,auto_exposure=1"
@@ -131,16 +165,14 @@ def camera_params(): #Only works on linux
 #
 #       continue
     os.system(set_camera_params)
+
 def start():
-    nt.initialize(server = "10.10.76.2")
-    print("nt is initialized.")
-    
-    target_info = nt.getTable("targetInfo")
-    
+
+    init_network_tables()
     camera_params()
 
     while True:
-        before = datetime.datetime.now()
+        before = datetime.datetime.now().timestamp()
         print("Imagetest main is running")
         frame = capture_images(0)
         
@@ -155,8 +187,6 @@ def start():
 
         binary_image = process_image(hsv_img, (5,5), img_hsv_lower, img_hsv_upper)
 
-
-
 #        if __DEBUG__:
 #            try:
 #                cv2.imshow("processed image", binary_image)
@@ -164,14 +194,12 @@ def start():
 #            except:
 #                print("failed to display proccessed image")
 
-
-
         target_contour = find_object(binary_image)
 
         if __DEBUG_REMOTE_PI__:
             if target_contour is not None:
                 print("Found a contour", target_contour.shape)
-                print(target_contour)
+                # print(target_contour)
             else:
                 print("No contours!")
         
@@ -190,20 +218,16 @@ def start():
         
         distance, angle = find_distance_and_angle(binary_image, width, height, center_x, center_y)
 
-        update_network_tables(distance, angle, target_info)
-        after = datetime.datetime.now()
+        update_distance_angle(distance, angle)
+        after = datetime.datetime.now().timestamp()
         
-        delay = before - after
-        print(str(delay) + " delay")
+        delay = after - before
+        print("processing complete in", delay, "microsec")
 
 
 if __name__ == "__main__":
     
     start()
-
-        
-        
-        
 
     # # # Display the BGR image with found objects bounded by rectangles
     # # if(displayImages):
