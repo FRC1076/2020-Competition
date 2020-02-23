@@ -5,9 +5,11 @@ from networktables import NetworkTables as nt
 import datetime
 import os
 
-__DEBUG__ = False
+__DEBUG__ = True
 __DEBUG_REMOTE_PI__ = False
-
+remote_pi_image_location = "/home/pi/test_images/frame1.jpg"
+fisheye_pi_image_location = "/home/pi/dev/cvon3/2020-Competition/test_images/frame1.jpg"
+image_location = fisheye_pi_image_location
 #use red camera fov if using the ps eye
 
 def process_image(hsv_img, kernelSize, lower_color_range, upper_color_range):
@@ -64,7 +66,7 @@ def find_bounding_box(img, contour):
     if __DEBUG__:
         try:
             cv2.imshow("contours", contoured_image)
-            cv2.waitKey(1) #Waits long enough for image to load
+            cv2.waitKey(0) #Waits long enough for image to load
         except:
             print("monitor not connected")
     
@@ -79,6 +81,7 @@ def find_distance_and_angle(img, w, h, center_x, center_y):
     camera_fov_degrees = 56 # on the low fov setting
     camera_fov = camera_fov_degrees/360 * 2 * math.pi # convert to radians
     angle_to_obj = (xydist[0] / img.shape[1]) * camera_fov
+    angle_to_obj = (180/math.pi)*angle_to_obj
     obj_angle = (w / img.shape[1]) * camera_fov # degrees of fov taken up by the object
     obj_width = 38 # inches - original measurement, probably actually 39"
     distance = ((math.sin((math.pi - obj_angle) / 2) /
@@ -101,16 +104,17 @@ def capture_images(device):
 
     if __DEBUG_REMOTE_PI__:
         print("Read image", frame.shape)
-
-    cv2.imwrite("/home/pi/test_images/frame1.jpg", img=frame)
     
-    if __DEBUG__: 
-        try:
-            cv2.imshow("frame", frame)
-            cv2.waitKey(1)
-        except:
-            print("failed to show frame")
+    
+#    if __DEBUG__: 
+#       try:
+#            cv2.imshow("frame", frame)
+#            cv2.waitKey(1)
+#        except:
+#            print("failed to show frame")
 
+    cv2.imwrite(image_location, frame)
+    
     return frame
 
 def update_network_tables(distance, angle, table):
@@ -138,25 +142,27 @@ def start():
     while True:
         before = datetime.datetime.now()
         print("Imagetest main is running")
-        capture_images(0)
-        bgr_img = cv2.imread("/home/pi/test_images/frame1.jpg")
+        frame = capture_images(0)
+        
+        bgr_img = cv2.imread(image_location)
         # print(bgr_img)
         # Convert the frame to HSV
         hsv_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2HSV)
         
-        img_bgr_lower = np.array([5, 24, 5]) 
-        img_bgr_upper = np.array([180, 255, 225])
+        img_hsv_lower = np.array([50,50,50])
+        img_hsv_upper = np.array([180,255,255])
         
-        binary_image = process_image(bgr_img, (5,5), img_bgr_lower, img_bgr_upper)
+
+        binary_image = process_image(hsv_img, (5,5), img_hsv_lower, img_hsv_upper)
 
 
 
-        if __DEBUG__:
-            try:
-                cv2.imshow("processed image", binary_image)
-                cv2.waitKey(1)
-            except:
-                print("failed to display proccessed image")
+#        if __DEBUG__:
+#            try:
+#                cv2.imshow("processed image", binary_image)
+#                cv2.waitKey(1)
+#            except:
+#                print("failed to display proccessed image")
 
 
 
