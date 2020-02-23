@@ -24,4 +24,4 @@ class shooter:
       RPM = forward * SCALE
       print("Set shooter speed ", forward, "RPM = ", RPM) 
 
-      #0.02 is 120 rpm (about)
+      #0.02 is 120 rpm (about) 

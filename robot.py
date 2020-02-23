@@ -13,6 +13,7 @@ import robotmap
 #Subsystems
 from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
+from subsystems.shooter import shooter
 import rev
 import wpilib.drive
 
@@ -64,6 +65,10 @@ class Robot(wpilib.TimedRobot):
         self.setupColorSensor()
 
         self.hasTurnedWheel = False
+
+        #Shooter
+    
+        self.shooter = shooter(robotmap.SHOOTER)
 
 
     def setupColorSensor(self):
@@ -266,7 +271,10 @@ class Robot(wpilib.TimedRobot):
 
         self.colorPistonUpdate()
         self.climberPistonUpdate()
-        self.climbWinchUpdate()
+        #self.climbWinchUpdate()
+
+
+        self.shooter.setShooterSpeed()
 
 
 def deadzone(val, deadzone): 
