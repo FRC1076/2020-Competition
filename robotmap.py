@@ -8,7 +8,8 @@ RIGHT_FOLLOWER_ID = 9
 
 COLOR_SENSOR_MOTOR = 3
 
-CLIMBER_WINCH_MOTOR = 6 # this number is not accurate and is likely to change
+CLIMBER_WINCH_MOTOR = 6 #TODO: Find actual port on robot
+
 #Soleoid IDs
 COLOR_SENSOR_EXTEND = 4
 COLOR_SENSOR_RETRACT = 5
