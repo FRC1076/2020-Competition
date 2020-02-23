@@ -4,6 +4,16 @@
 __pycache__/
 *.py[cod]
 *$py.class
+__pycache__\
+pip_cache\
+pip_cache/
+\__pycache__\*
+opkg_cache\
+opkg_cache/
+
+.pyc
+.installer_config
+.ini
 
 # C extensions
 *.so
@@ -138,3 +148,8 @@ dmypy.json
 .ini
 
 .pyc
+.deploy_cfg
+.ini
+__pycache__/robotmap.cpython-38.pyc
+imgui.ini
+__pycache__\robotmap.cpython-38.pyc
