@@ -135,7 +135,7 @@ class Robot(wpilib.TimedRobot):
 
 
     def colorPistonUpdate(self):
-        if self.operator.getAButtonPressed():
+        if self.operator.getPOV() == 180:
             if not self.colorArmIsExtended:
                 self.colorPiston.extend()
                 self.colorArmIsExtended = True
@@ -145,21 +145,21 @@ class Robot(wpilib.TimedRobot):
 
 
     def climberPistonUpdate(self):  
-        if self.operator.getBumperPressed(LEFT_HAND) and self.driver.getBumperPressed(LEFT_HAND):
+        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
             if not self.colorArmIsExtended:
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
 
-        elif self.operator.getTriggerAxis(LEFT_HAND) > 0.8 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
             if self.colorArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getBumperPressed(RIGHT_HAND) > 0.8 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
+        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
             self.climberWinchMotor.set(0.3)
 
-        elif self.operator.getTriggerPressed(RIGHT_HAND) > 0.8 and self.driver.getTriggerPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
             self.climberWinchMotor.set(-0.3)
         
         else:
