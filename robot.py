@@ -159,7 +159,7 @@ class Robot(wpilib.TimedRobot):
         if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
             self.climberWinchMotor.set(0.3)
 
-        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
             self.climberWinchMotor.set(-0.3)
         
         else:
@@ -249,12 +249,12 @@ class Robot(wpilib.TimedRobot):
         self.checkGameData()
 
         if self.operator.getStartButtonPressed():
-            if not self.hasTurnedWHeel():
+            if not self.hasTurnedWheel:
                 self.turnWheelInit()
             else:
                 self.searchColorInit()
             
-        if self.operator.getBackButton:
+        if not self.operator.getBackButton:
             self.colorSensorMotor.set(0.1)
         else:
             self.colorSensorMotor.set(0)
