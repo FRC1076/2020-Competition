@@ -51,8 +51,9 @@ class Robot(wpilib.TimedRobot):
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND, robotmap.COLOR_SENSOR_RETRACT))
         self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.CLIMBER_EXTEND, robotmap.CLIMBER_RETRACT))
         
-        self.climberWinchMotor = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR, rev.MotorType.kBrushed)
-        
+        self.climberWinchMotor1 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR1, rev.MotorType.kBrushed)
+        self.climberWinchMotor2 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR2, rev.MotorType.kBrushed)
+
         # Color Sensor
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev.CANSparkMax(robotmap.COLOR_SENSOR_MOTOR, rev.MotorType.kBrushed)
@@ -157,13 +158,16 @@ class Robot(wpilib.TimedRobot):
 
     def climbWinchUpdate(self):
         if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
-            self.climberWinchMotor.set(0.3)
+            self.climberWinchMotor1.set(0.3)
+            self.climberWinchMotor2.set(0.3)
 
         elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
-            self.climberWinchMotor.set(-0.3)
+            self.climberWinchMotor1.set(-0.3)
+            self.climberWinchMotor2.set(-0.3)
         
         else:
-            self.climberWinchMotor.set(0)
+            self.climberWinchMotor1.set(0)
+            self.climberWinchMotor2.set(0)
 
 
     def turnWheelInit(self):
