@@ -258,7 +258,7 @@ class Robot(wpilib.TimedRobot):
             else:
                 self.searchColorInit()
             
-        if not self.operator.getBackButton:
+        if self.operator.getBackButton:
             self.colorSensorMotor.set(0.1)
         else:
             self.colorSensorMotor.set(0)
