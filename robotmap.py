@@ -6,8 +6,8 @@ LEFT_FOLLOWER_ID = 10
 RIGHT_LEADER_ID = 7
 RIGHT_FOLLOWER_ID = 9
 
-COLOR_SENSOR_MOTOR = 11
-SHOOTER = 3
+COLOR_SENSOR_MOTOR = 2
+SHOOTER = 1
 
 CLIMBER_WINCH_MOTOR = 6 # this number is not accurate and is likely to change
 #Soleoid IDs

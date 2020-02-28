@@ -272,7 +272,7 @@ class Robot(wpilib.TimedRobot):
 
         self.colorPistonUpdate()
         self.climberPistonUpdate()
-        #self.climbWinchUpdate()
+        self.climbWinchUpdate()
 
 
         self.shooter.setShooterSpeed()
