@@ -139,7 +139,7 @@ class Robot(wpilib.TimedRobot):
         if self.operator.getPOV() == 180:
             self.colorPiston.extend()
             #self.colorArmIsExtended = True
-        elif self.operator.getPOV() == -1:
+        elif self.operator.getPOV() == 0:
             self.colorPiston.retract()
             #self.colorArmIsExtended = False
 
