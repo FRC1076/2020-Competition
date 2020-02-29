@@ -137,31 +137,29 @@ class Robot(wpilib.TimedRobot):
 
     def colorPistonUpdate(self):
         if self.operator.getPOV() == 180:
-            if not self.colorArmIsExtended:
-                self.colorPiston.extend()
-                self.colorArmIsExtended = True
-            else:
-                self.colorPiston.retract()
-                self.colorArmIsExtended = False
+            self.colorPiston.extend()
+            #self.colorArmIsExtended = True
+        elif self.operator.getPOV() == -1:
+            self.colorPiston.retract()
+            #self.colorArmIsExtended = False
 
 
     def climberPistonUpdate(self):  
         if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
-            if not self.colorArmIsExtended:
+            if not self.climberArmIsExtended:
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
-
         elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
-            if self.colorArmIsExtended:
+            if self.climberArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
+        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 :
             self.climberWinchMotor1.set(0.3)
             self.climberWinchMotor2.set(0.3)
 
-        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8:
             self.climberWinchMotor1.set(-0.3)
             self.climberWinchMotor2.set(-0.3)
         
@@ -258,9 +256,9 @@ class Robot(wpilib.TimedRobot):
             else:
                 self.searchColorInit()
             
-        if self.operator.getBackButton:
+        if self.operator.getBackButton():
             self.colorSensorMotor.set(0.1)
-        else:
+        elif not self.searchForColor and not self.turnWheel:
             self.colorSensorMotor.set(0)
 
         if self.searchForColor:
