@@ -49,11 +49,12 @@ class Robot(wpilib.TimedRobot):
         #TODO: SmartDashboard
         
         #Pneumatics
-        self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
-        self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND,robotmap.COLOR_SENSOR_RETRACT))
+        self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND, robotmap.COLOR_SENSOR_RETRACT))
+        self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.CLIMBER_EXTEND, robotmap.CLIMBER_RETRACT))
         
-        self.climberWinchMotor = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR, rev.MotorType.kBrushed)
-        
+        self.climberWinchMotor1 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR1, rev.MotorType.kBrushed)
+        self.climberWinchMotor2 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR2, rev.MotorType.kBrushed)
+
         # Color Sensor
         self.colorSensor = color_sensor()
         self.colorSensorMotor = rev.CANSparkMax(robotmap.COLOR_SENSOR_MOTOR, rev.MotorType.kBrushed)
@@ -139,34 +140,36 @@ class Robot(wpilib.TimedRobot):
 
 
     def colorPistonUpdate(self):
-        if self.operator.getAButtonPressed():
-            if not self.colorArmIsExtended:
-                self.colorPiston.extend()
-                self.colorArmIsExtended = True
-            else:
-                self.colorPiston.retract()
-                self.colorArmIsExtended = False
+        if self.operator.getPOV() == 180:
+            self.colorPiston.extend()
+            #self.colorArmIsExtended = True
+        elif self.operator.getPOV() == 0:
+            self.colorPiston.retract()
+            #self.colorArmIsExtended = False
 
 
     def climberPistonUpdate(self):  
-        if self.operator.getBumperPressed(LEFT_HAND) and self.driver.getBumperPressed(LEFT_HAND):
-            if not self.colorArmIsExtended:
+        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
+            if not self.climberArmIsExtended:
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
-
-        elif self.operator.getTriggerAxis(LEFT_HAND) > 0.8 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
-            if self.colorArmIsExtended:
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
+            if self.climberArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getBumperPressed(RIGHT_HAND) > 0.8 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
-                self.climberWinchMotor.set(0.3)
+        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 :
+            self.climberWinchMotor1.set(0.3)
+            self.climberWinchMotor2.set(0.3)
 
-        elif self.operator.getTriggerPressed(RIGHT_HAND) > 0.8 and self.driver.getTriggerPressed(RIGHT_HAND) > 0.8 and self.climberArmIsExtended:
-            self.climberWinchMotor.set(-0.3)
+        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8:
+            self.climberWinchMotor1.set(-0.3)
+            self.climberWinchMotor2.set(-0.3)
+        
         else:
-            self.climberWinchMotor.set(0)
+            self.climberWinchMotor1.set(0)
+            self.climberWinchMotor2.set(0)
 
 
     def turnWheelInit(self):
@@ -246,21 +249,21 @@ class Robot(wpilib.TimedRobot):
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
         
-        rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
+        rotation_value = -0.7 * self.driver.getX(LEFT_HAND) #Left stick x-axis
 	     
         self.drivetrain.arcadeDrive(forward, rotation_value)
 
         self.checkGameData()
 
         if self.operator.getStartButtonPressed():
-            if not self.hasTurnedWHeel():
+            if not self.hasTurnedWheel:
                 self.turnWheelInit()
             else:
                 self.searchColorInit()
             
-        if self.operator.getBackButton:
+        if self.operator.getBackButton():
             self.colorSensorMotor.set(0.1)
-        else:
+        elif not self.searchForColor and not self.turnWheel:
             self.colorSensorMotor.set(0)
 
         if self.searchForColor:
