@@ -13,6 +13,7 @@ import robotmap
 #Subsystems
 from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
+from subsystems.shooter import shooter
 import rev
 import wpilib.drive
 
@@ -66,6 +67,9 @@ class Robot(wpilib.TimedRobot):
 
         self.hasTurnedWheel = False
 
+        #Shooter
+    
+        self.shooter = shooter(robotmap.SHOOTER1, robotmap.SHOOTER2)
 
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
@@ -239,6 +243,7 @@ class Robot(wpilib.TimedRobot):
                     self.timer2 -= 1
 
             
+            
                 
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
@@ -270,6 +275,18 @@ class Robot(wpilib.TimedRobot):
         self.colorPistonUpdate()
         self.climberPistonUpdate()
         self.climbWinchUpdate()
+
+        #forward = self.stick.getRawAxis(5)
+        #if self.stick.getXButton():
+        #    forward = -1
+        
+        
+        if self.stick.getAButton() and self.stick.getStickButton(LEFT_HAND):
+            forward = robotmap.SHOOTER_SPEED 
+        else:
+            forward = 0
+        self.shooter.setShooterSpeed(forward)
+
 
 
 def deadzone(val, deadzone): 
