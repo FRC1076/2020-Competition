@@ -279,7 +279,7 @@ class Robot(wpilib.TimedRobot):
         
         
         if self.stick.getAButton() and self.stick.getStickButton(LEFT_HAND):
-            forward = SHOOTER_SPEED  
+            forward = robotmap.SHOOTER_SPEED 
         else:
             forward = 0
         self.shooter.setShooterSpeed(forward)
