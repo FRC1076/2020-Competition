@@ -16,6 +16,10 @@ from subsystems.color_sensor import color_sensor
 from subsystems.shooter import shooter
 import rev
 import wpilib.drive
+from subsystems.Aimer import Aimer
+from navx import AHRS
+import threading
+from networktables import NetworkTables
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
@@ -71,6 +75,12 @@ class Robot(wpilib.TimedRobot):
     
         self.shooter = shooter(robotmap.SHOOTER1, robotmap.SHOOTER2)
 
+        # Gyro
+        self.ahrs = AHRS.create_spi()
+        self.Aimer = Aimer(self.ahrs)
+        
+        #network tables
+        self.sd = NetworkTables.getTable('SmartDashboard')
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
         
@@ -98,7 +108,21 @@ class Robot(wpilib.TimedRobot):
     def autonomousPeriodic(self):
         #Go forward 10ft
         #Shoot?
-        pass
+        self.aAPoint = self.sd.getNumber('angle', 1)
+        self.Aimer.setaim(self.aAPoint)
+        while True :
+            x=0
+            if x==100:
+                break  
+            val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
+            if val >2 or val < -2:
+                    self.drivetrain.arcadeDrive(0, 1)
+                    print("not lined up")
+            else:
+                self.drivetrain.arcadeDrive(0,0)
+                print("lined up")
+            x=x+1
+        
 
 
     def teleopInit(self):
@@ -242,16 +266,18 @@ class Robot(wpilib.TimedRobot):
                 else:
                     self.timer2 -= 1
 
-            
+    def dummy_fun(self):
+        pass       
             
                 
     def teleopPeriodic(self):
-        forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
+        forward = self.driver.getY(RIGHT_HAND) 
+        #Right stick y-axis
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
+        rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
         
-        rotation_value = -0.7 * self.driver.getX(LEFT_HAND) #Left stick x-axis
-	     
-        self.drivetrain.arcadeDrive(forward, rotation_value)
+        if rotation_value > 0 or forward > 0:
+            self.drivetrain.arcadeDrive(forward, rotation_value)
 
         self.checkGameData()
 
@@ -287,6 +313,20 @@ class Robot(wpilib.TimedRobot):
             forward = 0
         self.shooter.setShooterSpeed(forward)
 
+        if self.driver.getXButtonPressed():
+            self.Aimer.setaim(50)
+            
+            
+        if self.driver.getBButton():
+            val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
+            print("Angle: {} Setpoint: {} Val: {}".format(self.Aimer.getAngle(), self.Aimer.getsetpoint(), val))
+            if val >2 or val < -2:
+                self.drivetrain.arcadeDrive(0, 1)
+                print("not lined up")
+            else:
+                self.drivetrain.arcadeDrive(0,0)
+                print("lined up")
+            
 
 
 def deadzone(val, deadzone): 
