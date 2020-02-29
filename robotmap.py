@@ -1,5 +1,7 @@
 deadzone = 0.2
 
+SHOOTER_SPEED = -0.5
+
 #Motor IDs
 LEFT_LEADER_ID = 8
 LEFT_FOLLOWER_ID = 10
@@ -7,7 +9,8 @@ RIGHT_LEADER_ID = 7
 RIGHT_FOLLOWER_ID = 9
 
 COLOR_SENSOR_MOTOR = 2
-SHOOTER = 1
+SHOOTER1 = 1
+SHOOTER2 = 4
 
 CLIMBER_WINCH_MOTOR = 6 # this number is not accurate and is likely to change
 #Soleoid IDs

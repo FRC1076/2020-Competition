@@ -68,8 +68,7 @@ class Robot(wpilib.TimedRobot):
 
         #Shooter
     
-        self.shooter = shooter(robotmap.SHOOTER)
-
+        self.shooter = shooter(robotmap.SHOOTER1, robotmap.SHOOTER2)
 
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
@@ -274,12 +273,17 @@ class Robot(wpilib.TimedRobot):
         self.climberPistonUpdate()
         self.climbWinchUpdate()
 
-        forward = self.stick.getRawAxis(5)
-        if self.stick.getXButton():
-            forward = -1
+        #forward = self.stick.getRawAxis(5)
+        #if self.stick.getXButton():
+        #    forward = -1
+        
+        
         if self.stick.getAButton() and self.stick.getStickButton(LEFT_HAND):
-            forward = -0.5   
+            forward = SHOOTER_SPEED  
+        else:
+            forward = 0
         self.shooter.setShooterSpeed(forward)
+
 
 
 def deadzone(val, deadzone): 
