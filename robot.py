@@ -274,8 +274,12 @@ class Robot(wpilib.TimedRobot):
         self.climberPistonUpdate()
         self.climbWinchUpdate()
 
-
-        self.shooter.setShooterSpeed()
+        forward = self.stick.getRawAxis(5)
+        if self.stick.getXButton():
+            forward = -1
+        if self.stick.getAButton() and self.stick.getStickButton(LEFT_HAND):
+            forward = -0.5   
+        self.shooter.setShooterSpeed(forward)
 
 
 def deadzone(val, deadzone): 
