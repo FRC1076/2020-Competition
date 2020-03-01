@@ -282,14 +282,14 @@ class Robot(wpilib.TimedRobot):
         
         
         if self.driver.getStickButton(LEFT_HAND):
-            shooterSpeed = robotmap.SHOOTER_SPEED 
+            shooterRPM = robotmap.SHOOTER_RPM 
         else:
-            shooterSpeed = 0
+            shooterRPM = 0
         if self.driver.getAButton() and self.driver.getStickButton(LEFT_HAND):
             loaderSpeed = robotmap.LOADER_SPEED 
         else:
             loaderSpeed = 0
-        self.shooter.setShooterSpeed(loaderSpeed, shooterSpeed)
+        self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
 
 
 def deadzone(val, deadzone): 

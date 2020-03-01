@@ -10,21 +10,11 @@ class shooter:
         if rm.SHOOTER is not None:
             self.motor2 = rev.CANSparkMax(port2, rev.MotorType.kBrushed)
         
-        if rm.LOADER is not None:
-            self.pidController1 = self.motor1.getPIDController()
         if rm.SHOOTER is not None:
             self.pidController2 = self.motor2.getPIDController()
         self.setPIDCoefficients()
 
     def setPIDCoefficients(self):
-        if rm.LOADER is not None:
-            self.pidController1.setP(rm.PID_kP)
-            self.pidController1.setI(rm.PID_kI)
-            self.pidController1.setD(rm.PID_kD)
-            #self.pidController1.setIz(rm.PID_kIz)
-            self.pidController1.setFF(rm.PID_kFF)
-            self.pidController1.setOutputRange(rm.PID_kMinOutput, rm.PID_kMaxOutput)
-
         if rm.SHOOTER is not None:
             self.pidController2.setP(rm.PID_kP)
             self.pidController2.setI(rm.PID_kI)
@@ -33,29 +23,24 @@ class shooter:
             self.pidController2.setFF(rm.PID_kFF)
             self.pidController2.setOutputRange(rm.PID_kMinOutput, rm.PID_kMaxOutput)
 
-    def setShooterSpeed(self, loader_RPM, shooter_RPM):
-      
-      #self.motor1.set(forward)
-      #self.motor2.set(forward)
-
-        print("RPM Before = ", loader_RPM, shooter_RPM)
+    def setShooterSpeed(self, loader_speed, shooter_RPM):
+  
+        print("Loader Speed / Shooter RPM Before = ", loader_speed, shooter_RPM)
 
         if (shooter_RPM > rm.PID_kMaxRPM):
             shooter_RPM = rm.PID_kMaxRPM
         elif (shooter_RPM < 0):
             shooter_RPM = 0
-        if (loader_RPM > rm.PID_kMaxRPM):
-            loader_RPM = rm.PID_kMaxRPM
-        elif (loader_RPM < 0):
-            loader_RPM = 0
+        if (loader_speed > 1):
+            loader_speed = 1
+        elif (loader_speed < 0):
+            loader_speed = 0
 
   
-        print("RPM After = ", loader_RPM, shooter_RPM)
-
-        
+        print("Loader Speed / Shooter RPM After = ", loader_speed, shooter_RPM)
     
         if rm.LOADER is not None:
-            self.pidController1.setReference(loader_RPM, rev.ControlType.kVelocity)
+            self.motor1.set(-loader_speed)
         if rm.SHOOTER is not None:
             self.pidController2.setReference(shooter_RPM, rev.ControlType.kVelocity)
 
