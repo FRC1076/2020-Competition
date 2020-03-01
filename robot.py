@@ -51,6 +51,7 @@ class Robot(wpilib.TimedRobot):
         #Pneumatics
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND, robotmap.COLOR_SENSOR_RETRACT))
         self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.CLIMBER_EXTEND, robotmap.CLIMBER_RETRACT))
+        self.gearshiftPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.DRIVE_SHIFT_EXTEND, robotmap.DRIVE_SHIFT_RETRACT))
         
         self.climberWinchMotor1 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR1, rev.MotorType.kBrushed)
         self.climberWinchMotor2 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR2, rev.MotorType.kBrushed)
@@ -119,6 +120,7 @@ class Robot(wpilib.TimedRobot):
         #Pneumatics piston state recorder
         self.colorArmIsExtended = False
         self.climberArmIsExtended = False
+        self.gearshiftPosition = "Low"
 
         #TODO: Add encoders, other sensors
         self.hasTurnedWheel = False
@@ -244,9 +246,17 @@ class Robot(wpilib.TimedRobot):
                 else:
                     self.timer2 -= 1
 
+    def shiftGears(self):
+        if self.driver.getStartButtonPressed and self.gearshiftPosition == "Low":
+            self.gearshiftPiston.extend
+            self.gearshiftPosition = "High"
+        elif self.driver.getStartButtonPressed and self.gearshiftPosition == "High":
+            self.gearshiftPiston.retract
+            self.gearshiftPosition = "Low"
+        else:
+            pass
+
             
-            
-                
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
@@ -277,6 +287,7 @@ class Robot(wpilib.TimedRobot):
         self.colorPistonUpdate()
         self.climberPistonUpdate()
         self.climbWinchUpdate()
+        self.shiftGears()
 
         #forward = self.stick.getRawAxis(5)
         #if self.stick.getXButton():
