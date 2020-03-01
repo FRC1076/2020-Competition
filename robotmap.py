@@ -1,7 +1,7 @@
 deadzone = 0.2
 
 LOADER_SPEED = 1
-SHOOTER_RPM = 1500
+SHOOTER_RPM = 500
 
 #Motor IDs
 LEFT_LEADER_ID = 8
@@ -40,4 +40,4 @@ PID_kIz = 0
 PID_kFF = 0.000015
 PID_kMaxOutput = 1
 PID_kMinOutput = -1
-PID_kMaxRPM = 1500
+PID_kMaxRPM = 5700
