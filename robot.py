@@ -287,8 +287,8 @@ class Robot(wpilib.TimedRobot):
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
         rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
         
-        if rotation_value > 0 or forward > 0:
-            self.drivetrain.arcadeDrive(forward, rotation_value)
+        #if rotation_value > 0 or forward > 0:
+        self.drivetrain.arcadeDrive(forward, rotation_value)
 
         self.checkGameData()
 
@@ -320,10 +320,12 @@ class Robot(wpilib.TimedRobot):
         
         if self.operator.getRawAxis(4) > 0.8:
             shooterRPM = robotmap.SHOOTER_RPM 
+            print("shoot!")
         else:
             shooterRPM = 0
         
         if self.operator.getAButton() and self.operator.getRawAxis(4) > 0.8:
+            print("load!")
             loaderSpeed = robotmap.LOADER_SPEED 
         else:
             loaderSpeed = 0
