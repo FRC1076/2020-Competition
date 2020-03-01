@@ -23,6 +23,9 @@ class Aimer:
         self.turncontroller =turnController
         self.rotateToAngleRate = 0
 
+    def reset(self):
+        self.gyro.reset()
+
     def setaim(self,setpoint):
         self.setpoint=setpoint
         self.turncontroller.setSetpoint(self.gyro.getAngle()+self.setpoint)

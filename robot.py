@@ -80,7 +80,10 @@ class Robot(wpilib.TimedRobot):
         self.Aimer = Aimer(self.ahrs)
         
         #network tables
-        self.sd = NetworkTables.getTable('SmartDashboard')
+        #self.sd = NetworkTables.getTable('SmartDashboard')
+        self.sd = NetworkTables.getTable('VISION')
+
+
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
         
@@ -103,27 +106,35 @@ class Robot(wpilib.TimedRobot):
 
     def autonomousInit(self):
         self.gameData = ""
+        self.autonTimer = wpilib.Timer()
+        self.autonTimer.start()
+        self.Aimer.reset()
+
+        self.Aimer.setaim(180)
+
+        self.foundTarget = False
+
+
+    def rotateToPoint(self):
+        val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
+        if val > 1 or val < -1:
+            self.drivetrain.arcadeDrive(0, 1)
+        else:
+            self.drivetrain.arcadeDrive(0,0)
+            return True
+
+
 
 
     def autonomousPeriodic(self):
-        #Go forward 10ft
-        #Shoot?
-        self.aAPoint = self.sd.getNumber('angle', 1)
-        self.Aimer.setaim(self.aAPoint)
-        while True :
-            x=0
-            if x==100:
-                break  
-            val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
-            if val >2 or val < -2:
-                    self.drivetrain.arcadeDrive(0, 1)
-                    print("not lined up")
-            else:
-                self.drivetrain.arcadeDrive(0,0)
-                print("lined up")
-            x=x+1
-        
-
+        #Move forward for 1 second
+        if self.autonTimer.get() < 1:
+            self.drivetrain.arcadeDrive(0.7, 0)
+        else:
+            #Rotate 180, then rotate to target
+            if self.rotateToPoint() and self.foundTarget == False:
+                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+                self.foundTarget = True
 
     def teleopInit(self):
         self.gameData = ""
@@ -317,15 +328,7 @@ class Robot(wpilib.TimedRobot):
             self.Aimer.setaim(50)
             
             
-        if self.driver.getBButton():
-            val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
-            print("Angle: {} Setpoint: {} Val: {}".format(self.Aimer.getAngle(), self.Aimer.getsetpoint(), val))
-            if val >2 or val < -2:
-                self.drivetrain.arcadeDrive(0, 1)
-                print("not lined up")
-            else:
-                self.drivetrain.arcadeDrive(0,0)
-                print("lined up")
+       
             
 
 
