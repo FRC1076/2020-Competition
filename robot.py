@@ -289,7 +289,7 @@ class Robot(wpilib.TimedRobot):
             loaderSpeed = robotmap.LOADER_SPEED 
         else:
             loaderSpeed = 0
-        self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
+        self.shooter.setShooter  Speed(loaderSpeed, shooterRPM)
 
 
 def deadzone(val, deadzone): 

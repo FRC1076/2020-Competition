@@ -17,7 +17,7 @@ class shooter:
     def setPIDCoefficients(self):
         if rm.SHOOTER is not None:
             self.pidController2.setP(rm.PID_kP)
-            self.pidController2.setI(rm.PID_kI)
+            self.pidController2.setI(rm.PID_kI) 
             self.pidController2.setD(rm.PID_kD)
             #self.pidController2.setIz(rm.PID_kIz)
             self.pidController2.setFF(rm.PID_kFF)
