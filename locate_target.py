@@ -87,8 +87,8 @@ def find_distance_and_angle(img, w, h, center_x, center_y):
     distance = ((math.sin((math.pi - obj_angle) / 2) /
                 math.sin(obj_angle / 2)) * (obj_width / 2))
 
-    ## empirical measurement were used to come up with these corrections
-    distance = distance - .25 * (117 - distance) + 27 # To account for measured error
+    #empirical measurement were used to come up with these corrections
+    distance = distance - .125 * (distance - 49) - 11 # To account for measured error
     
     if __DEBUG__:
         print(str(distance) + "distance to target")
@@ -128,11 +128,10 @@ def update_network_tables(distance, angle, table):
 def camera_params(): #Only works on linux
     set_camera_params = "v4l2-ctl -d /dev/video0 --set-ctrl=white_balance_automatic=0,exposure=1,contrast=30,gain_automatic=0,auto_exposure=1"
 #   while == os.system(set_camera_params):
-#
 #       continue
     os.system(set_camera_params)
 def start():
-    nt.initialize(server = "10.10.76.2")
+    nt.initialize(server = "10.10.76.17")
     print("nt is initialized.")
     
     target_info = nt.getTable("targetInfo")
