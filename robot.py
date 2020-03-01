@@ -69,11 +69,11 @@ class Robot(wpilib.TimedRobot):
         
         self.setupColorSensor()
 
-        self.hasTurnedWheel = False
+        
 
         #Shooter
     
-        self.shooter = shooter(robotmap.SHOOTER1, robotmap.SHOOTER2)
+        self.shooter = shooter(robotmap.LOADER, robotmap.SHOOTER)
 
         # Gyro
         self.ahrs = AHRS.create_spi()
@@ -156,6 +156,7 @@ class Robot(wpilib.TimedRobot):
         self.climberArmIsExtended = False
 
         #TODO: Add encoders, other sensors
+        self.hasTurnedWheel = False
 
 
     def debugColorSensor(self, color=None):
@@ -184,21 +185,22 @@ class Robot(wpilib.TimedRobot):
 
 
     def climberPistonUpdate(self):  
-        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
+        if self.operator.getRawAxis(2) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
             if not self.climberArmIsExtended:
+                print("extend")
                 self.climberPiston.extend()
                 self.climberArmIsExtended = True
-        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
+        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
             if self.climberArmIsExtended:
                 self.climberPiston.retract()
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getRawAxis(4) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND) > 0.8 :
-            self.climberWinchMotor1.set(0.3)
-            self.climberWinchMotor2.set(0.3)
+        if self.operator.getRawAxis(2) > 0.5 and self.driver.getBumper(RIGHT_HAND) > 0.8 :
+            self.climberWinchMotor1.set(0.75)
+            self.climberWinchMotor2.set(0.75)
 
-        elif self.operator.getRawAxis(4) > 0.5 and self.driver.getStickButtonPressed(RIGHT_HAND) > 0.8:
+        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getStickButton(RIGHT_HAND) > 0.8:
             self.climberWinchMotor1.set(-0.3)
             self.climberWinchMotor2.set(-0.3)
         
@@ -277,8 +279,6 @@ class Robot(wpilib.TimedRobot):
                 else:
                     self.timer2 -= 1
 
-    def dummy_fun(self):
-        pass       
             
                 
     def teleopPeriodic(self):
@@ -299,7 +299,7 @@ class Robot(wpilib.TimedRobot):
                 self.searchColorInit()
             
         if self.operator.getBackButton():
-            self.colorSensorMotor.set(0.1)
+            self.colorSensorMotor.set(0.2)
         elif not self.searchForColor and not self.turnWheel:
             self.colorSensorMotor.set(0)
 
@@ -318,18 +318,17 @@ class Robot(wpilib.TimedRobot):
         #    forward = -1
         
         
-        if self.operator.getAButton() and self.operator.getStickButton(LEFT_HAND):
-            forward = robotmap.SHOOTER_SPEED 
+        if self.operator.getRawAxis(4) > 0.8:
+            shooterRPM = robotmap.SHOOTER_RPM 
         else:
-            forward = 0
-        self.shooter.setShooterSpeed(forward)
+            shooterRPM = 0
+        
+        if self.operator.getAButton() and self.operator.getRawAxis(4) > 0.8:
+            loaderSpeed = robotmap.LOADER_SPEED 
+        else:
+            loaderSpeed = 0
+        self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
 
-        if self.driver.getXButtonPressed():
-            self.Aimer.setaim(50)
-            
-            
-       
-            
 
 
 def deadzone(val, deadzone): 
