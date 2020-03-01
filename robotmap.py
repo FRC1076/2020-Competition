@@ -1,6 +1,7 @@
 deadzone = 0.2
 
-SHOOTER_SPEED = -0.5
+LOADER_SPEED = 1
+SHOOTER_RPM = 500
 
 #Motor IDs
 LEFT_LEADER_ID = 8
@@ -10,8 +11,13 @@ RIGHT_FOLLOWER_ID = 9
 
 COLOR_SENSOR_MOTOR = 2
 
-SHOOTER1 = 1
-SHOOTER2 = 4
+#KEN BONE
+#LOADER = 1
+#SHOOTER = 3
+
+#2020 Competition Bot
+LOADER = 4
+SHOOTER = 6
 
 
 CLIMBER_WINCH_MOTOR1 = 3 #TODO: Find actual port on robot
@@ -25,3 +31,13 @@ CLIMBER_RETRACT = 3
 
 DRIVE_SHIFT_EXTEND = 0
 DRIVE_SHIFT_RETRACT = 1
+
+#PID Coefficients
+PID_kP = 0.01
+PID_kI = 0
+PID_kD = 0
+PID_kIz = 0
+PID_kFF = 0.000015
+PID_kMaxOutput = 1
+PID_kMinOutput = -1
+PID_kMaxRPM = 5700

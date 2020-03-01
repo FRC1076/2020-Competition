@@ -69,7 +69,7 @@ class Robot(wpilib.TimedRobot):
 
         #Shooter
     
-        self.shooter = shooter(robotmap.SHOOTER1, robotmap.SHOOTER2)
+        self.shooter = shooter(robotmap.LOADER, robotmap.SHOOTER)
 
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
@@ -283,12 +283,15 @@ class Robot(wpilib.TimedRobot):
         #    forward = -1
         
         
-        if self.operator.getAButton() and self.operator.getStickButton(LEFT_HAND):
-            forward = robotmap.SHOOTER_SPEED 
+        if self.operator.getRawAxis(4) > 0.8:
+            shooterRPM = robotmap.SHOOTER_RPM 
         else:
-            forward = 0
-        self.shooter.setShooterSpeed(forward)
-
+            shooterRPM = 0
+        if self.operator.getAButton() and self.operator.getRawAxis(4) > 0.8:
+            loaderSpeed = robotmap.LOADER_SPEED 
+        else:
+            loaderSpeed = 0
+        self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
 
 
 def deadzone(val, deadzone): 
