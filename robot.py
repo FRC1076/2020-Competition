@@ -136,6 +136,9 @@ class Robot(wpilib.TimedRobot):
                 self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
                 self.foundTarget = True
 
+        if self.foundTarget:
+            self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
+
     def teleopInit(self):
         self.gameData = ""
         self.goal = ""
