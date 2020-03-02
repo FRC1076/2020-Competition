@@ -253,9 +253,7 @@ class Robot(wpilib.TimedRobot):
         elif self.driver.getStartButtonPressed and self.gearshiftPosition == "High":
             self.gearshiftPiston.retract
             self.gearshiftPosition = "Low"
-        else:
-            pass
-
+            
             
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
