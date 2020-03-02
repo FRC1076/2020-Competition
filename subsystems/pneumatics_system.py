@@ -16,6 +16,9 @@ class pneumatic_system:
     def extend(self):
         self.piston.set(pneumatic_system.stateExtend)
 
+    def get(self):
+        self.piston.get()
+
 
         ''' SOLENOID LIST
             COLOR SENSOR WHEEL: 4, 5

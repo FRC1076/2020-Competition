@@ -120,7 +120,10 @@ class Robot(wpilib.TimedRobot):
         #Pneumatics piston state recorder
         self.colorArmIsExtended = False
         self.climberArmIsExtended = False
+        
         self.gearshiftPosition = "Low"
+        if self.gearshiftPiston.get() == wpilib.DoubleSolenoid.Value.kReverse:
+            self.gearshiftPiston.extend()
 
         #TODO: Add encoders, other sensors
         self.hasTurnedWheel = False
@@ -248,12 +251,12 @@ class Robot(wpilib.TimedRobot):
 
     def shiftGears(self):
         if self.driver.getStartButtonPressed and self.gearshiftPosition == "Low":
-            self.gearshiftPiston.extend
+            self.gearshiftPiston.extend()
             self.gearshiftPosition = "High"
         elif self.driver.getStartButtonPressed and self.gearshiftPosition == "High":
-            self.gearshiftPiston.retract
+            self.gearshiftPiston.retract()
             self.gearshiftPosition = "Low"
-            
+
             
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
