@@ -38,6 +38,9 @@ class Aimer:
     def getsetpoint(self):
         return self.setpoint
 
+    def calculate(self, m):
+        return self.turncontroller.calculate(m)
+
     def pidWrite(self, output):
         """This function is invoked periodically by the PID Controller,
         based upon navX MXP yaw angle input and PID Coefficients.

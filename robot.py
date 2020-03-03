@@ -300,6 +300,31 @@ class Robot(wpilib.TimedRobot):
                 self.gearshiftPosition = "Low"
                 #print("Shifted to low gear")
 
+    def visionShooterUpdate(self):
+        """
+        If whammy is pressed, do the following steps:
+        aim at target
+        run convayer to bring in 1 ball
+        calculate speed?
+        shoot
+        """
+        loaderSpeed = 0
+        shooterRPM  = 0
+
+        self.Aimer.reset()
+        
+        self.Aimer.setaim(self.sd.getNumber("ANGLE", 0))
+        
+        turnAmount = self.Aimer.calculate(self.Aimer.getAngle())
+        self.drivetrain.arcadeDrive(0, turnAmount)
+
+
+        if turnAmount == 0:
+            loaderSpeed = robotmap.LOADER_SPEED
+            shooterRPM = robotmap.SHOOTER_RPM
+            
+        self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
+        
 
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) 
@@ -334,22 +359,20 @@ class Robot(wpilib.TimedRobot):
         self.climbWinchUpdate()
         self.shiftGears()
 
-        #forward = self.stick.getRawAxis(5)
-        #if self.stick.getXButton():
-        #    forward = -1
+        if self.operator.getRawAxis(4):
+            self.visionShooterUpdate()
         
-        
-        if self.operator.getRawAxis(4) > 0.8:
-            shooterRPM = robotmap.SHOOTER_RPM 
-            print("shoot!")
-        else:
-            shooterRPM = 0
-        
-        if self.operator.getAButton() and self.operator.getRawAxis(4) > 0.8:
-            print("load!")
-            loaderSpeed = robotmap.LOADER_SPEED 
+
+        if self.operator.getAButton():
+            loaderSpeed = robotmap.LOADER_SPEED
+            if self.operator.getBButton():
+                shooterRPM = robotmap.SHOOTER_RPM
+            else:
+                shooterRPM = 0
         else:
             loaderSpeed = 0
+
+        
         self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
 
 
