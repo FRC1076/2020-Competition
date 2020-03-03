@@ -122,8 +122,7 @@ class Robot(wpilib.TimedRobot):
         self.climberArmIsExtended = False
         
         self.gearshiftPosition = "Low"
-        if self.gearshiftPiston.get() == wpilib.DoubleSolenoid.Value.kReverse:
-            self.gearshiftPiston.extend()
+        self.gearshiftPiston.extend()
 
         #TODO: Add encoders, other sensors
         self.hasTurnedWheel = False
@@ -250,12 +249,15 @@ class Robot(wpilib.TimedRobot):
                     self.timer2 -= 1
 
     def shiftGears(self):
-        if self.driver.getStartButtonPressed and self.gearshiftPosition == "Low":
-            self.gearshiftPiston.extend()
-            self.gearshiftPosition = "High"
-        elif self.driver.getStartButtonPressed and self.gearshiftPosition == "High":
-            self.gearshiftPiston.retract()
-            self.gearshiftPosition = "Low"
+        if self.driver.getStartButtonPressed():
+            if self.gearshiftPosition == "Low":
+                self.gearshiftPiston.retract()
+                self.gearshiftPosition = "High"
+                #print("Shifted to high gear")
+            else:
+                self.gearshiftPiston.extend()
+                self.gearshiftPosition = "Low"
+                #print("Shifted to low gear")
 
             
     def teleopPeriodic(self):

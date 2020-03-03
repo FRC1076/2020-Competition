@@ -25,7 +25,7 @@ class shooter:
 
     def setShooterSpeed(self, loader_speed, shooter_RPM):
   
-        print("Loader Speed / Shooter RPM Before = ", loader_speed, shooter_RPM)
+        #print("Loader Speed / Shooter RPM Before = ", loader_speed, shooter_RPM)
 
         if (shooter_RPM > rm.PID_kMaxRPM):
             shooter_RPM = rm.PID_kMaxRPM
@@ -37,7 +37,7 @@ class shooter:
             loader_speed = 0
 
   
-        print("Loader Speed / Shooter RPM After = ", loader_speed, shooter_RPM)
+        #print("Loader Speed / Shooter RPM After = ", loader_speed, shooter_RPM)
     
         if rm.LOADER is not None:
             self.motor1.set(-loader_speed)
