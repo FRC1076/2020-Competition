@@ -16,6 +16,10 @@ from subsystems.color_sensor import color_sensor
 from subsystems.shooter import shooter
 import rev
 import wpilib.drive
+from subsystems.Aimer import Aimer
+from navx import AHRS
+import threading
+from networktables import NetworkTables
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
@@ -72,6 +76,15 @@ class Robot(wpilib.TimedRobot):
     
         self.shooter = shooter(robotmap.LOADER, robotmap.SHOOTER)
 
+        # Gyro
+        self.ahrs = AHRS.create_spi()
+        self.Aimer = Aimer(self.ahrs)
+        
+        #network tables
+        #self.sd = NetworkTables.getTable('SmartDashboard')
+        self.sd = NetworkTables.getTable('VISION')
+
+
     def setupColorSensor(self):
         self.colorMatch = ColorMatch()
         
@@ -94,13 +107,41 @@ class Robot(wpilib.TimedRobot):
 
     def autonomousInit(self):
         self.gameData = ""
+        self.autonTimer = wpilib.Timer()
+        self.autonTimer.start()
+        self.Aimer.reset()
+
+        self.Aimer.setaim(180)
+
+        self.foundTarget = False
+
+
+    def rotateToPoint(self):
+        val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
+        print(val)
+        if val > 6 or val < -6:
+            self.drivetrain.arcadeDrive(0, 0.7)
+        else:
+            self.drivetrain.arcadeDrive(0,0)
+            return True
+
+
 
 
     def autonomousPeriodic(self):
-        #Go forward 10ft
-        #Shoot?
-        pass
+        #Move forward for 1 second
+        if self.autonTimer.get() < 1:
+            self.drivetrain.arcadeDrive(-0.75, 0)
+        else:
+            #Rotate 180, then rotate to target
+            if not self.foundTarget and self.rotateToPoint():
+                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+                #self.Aimer.setaim(self.Aimer.getAngle())
+                self.foundTarget = True
 
+        if self.foundTarget:
+            self.Aimer.setaim(self.Aimer.getAngle())
+            self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
 
     def teleopInit(self):
         self.gameData = ""
@@ -259,13 +300,14 @@ class Robot(wpilib.TimedRobot):
                 self.gearshiftPosition = "Low"
                 #print("Shifted to low gear")
 
-            
+
     def teleopPeriodic(self):
-        forward = self.driver.getY(RIGHT_HAND) #Right stick y-axis
+        forward = self.driver.getY(RIGHT_HAND) 
+        #Right stick y-axis
         forward = 0.75 * deadzone(forward, robotmap.deadzone)
+        rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
         
-        rotation_value = -0.7 * self.driver.getX(LEFT_HAND) #Left stick x-axis
-	     
+        #if rotation_value > 0 or forward > 0:
         self.drivetrain.arcadeDrive(forward, rotation_value)
 
         self.checkGameData()
@@ -299,13 +341,17 @@ class Robot(wpilib.TimedRobot):
         
         if self.operator.getRawAxis(4) > 0.8:
             shooterRPM = robotmap.SHOOTER_RPM 
+            print("shoot!")
         else:
             shooterRPM = 0
+        
         if self.operator.getAButton() and self.operator.getRawAxis(4) > 0.8:
+            print("load!")
             loaderSpeed = robotmap.LOADER_SPEED 
         else:
             loaderSpeed = 0
         self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
+
 
 
 def deadzone(val, deadzone): 
