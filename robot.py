@@ -117,8 +117,9 @@ class Robot(wpilib.TimedRobot):
 
     def rotateToPoint(self):
         val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
-        if val > 1 or val < -1:
-            self.drivetrain.arcadeDrive(0, 1)
+        print(val)
+        if val > 6 or val < -6:
+            self.drivetrain.arcadeDrive(0, 0.7)
         else:
             self.drivetrain.arcadeDrive(0,0)
             return True
@@ -129,14 +130,16 @@ class Robot(wpilib.TimedRobot):
     def autonomousPeriodic(self):
         #Move forward for 1 second
         if self.autonTimer.get() < 1:
-            self.drivetrain.arcadeDrive(0.7, 0)
+            self.drivetrain.arcadeDrive(-0.75, 0)
         else:
             #Rotate 180, then rotate to target
-            if self.rotateToPoint() and self.foundTarget == False:
+            if not self.foundTarget and self.rotateToPoint():
                 self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+                #self.Aimer.setaim(self.Aimer.getAngle())
                 self.foundTarget = True
 
         if self.foundTarget:
+            self.Aimer.setaim(self.Aimer.getAngle())
             self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
 
     def teleopInit(self):
