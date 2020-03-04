@@ -166,16 +166,8 @@ def camera_params(): #Only works on linux
     os.system(set_camera_params)
 
 def start():
-<<<<<<< HEAD
-    nt.initialize(server = "10.10.76.17")
-    print("nt is initialized.")
-    
-    target_info = nt.getTable("targetInfo")
-    
-=======
 
     init_network_tables()
->>>>>>> abbe676964d31662af43701783359a974e2130d4
     camera_params()
 
     while True:
