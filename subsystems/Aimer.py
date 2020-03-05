@@ -4,7 +4,7 @@ import wpilib.controller
 import math
 
 kP = 0.03
-kI = 0.00
+kI = 0.02
 kD = 0.00
 kF = 0.00
 kToleranceDegrees = 2.0

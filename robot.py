@@ -71,6 +71,7 @@ class Robot(wpilib.TimedRobot):
         self.setupColorSensor()
 
         
+        
 
         #Shooter
     
@@ -81,8 +82,9 @@ class Robot(wpilib.TimedRobot):
         self.Aimer = Aimer(self.ahrs)
         
         #network tables
-        #self.sd = NetworkTables.getTable('SmartDashboard')
         self.sd = NetworkTables.getTable('VISION')
+        
+        
 
 
     def setupColorSensor(self):
@@ -108,17 +110,20 @@ class Robot(wpilib.TimedRobot):
     def autonomousInit(self):
         self.gameData = ""
         self.autonTimer = wpilib.Timer()
-        self.autonTimer.start()
+        
         self.Aimer.reset()
 
-        self.Aimer.setaim(180)
+        self.Aimer.setaim(self.Aimer.getAngle())
+        self.turned180 = False
 
-        self.foundTarget = False
+        self.setTarget = False
+
+        self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
 
 
     def rotateToPoint(self):
         val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
-        print(val)
+        #print(val)
         if val > 6 or val < -6:
             self.drivetrain.arcadeDrive(0, 0.7)
         else:
@@ -129,21 +134,54 @@ class Robot(wpilib.TimedRobot):
 
 
     def autonomousPeriodic(self):
+        
+        amt = self.Aimer.calculate(self.Aimer.getAngle())
         #Move forward for 1 second
-        if self.autonTimer.get() < 1:
-            self.drivetrain.arcadeDrive(-0.75, 0)
-        else:
-            #Rotate 180, then rotate to target
-            if not self.foundTarget and self.rotateToPoint():
-                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
-                #self.Aimer.setaim(self.Aimer.getAngle())
-                self.foundTarget = True
+        #if self.autonTimer.get() < 1:
+        #    self.drivetrain.arcadeDrive(-0.75, 0)
+        #else:
+        #Rotate 180, then rotate to target
+        print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
+        self.drivetrain.arcadeDrive(0, -1 * amt)
 
-        if self.foundTarget:
-            self.Aimer.setaim(self.Aimer.getAngle())
+        if(abs(amt) < 1):
+            self.autonTimer.start()
+            
+        if self.autonTimer.get() > 0.2:
             self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
+        #if amt == 0:
+        #    self.turned180 = True
+        #    if not self.setTarget:
+        #        self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+        #        self.setTarget = True
+        #    else:
+        #        self.Aimer.setaim(self.Aimer.getAngle())
+        #        
+                
+                
+            
+                
+            
+                
+                    
+            
+        """if self.rotateToPoint():
+            if not self.foundTarget:
+                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+                print(self.sd.getNumber("ANGLE", 0))
+                self.foundTarget = True
+            
+            #self.Aimer.setaim(self.Aimer.getAngle())
+            #self.foundTarget = True
+        """
+        #if self.foundTarget:
+        #    self.Aimer.setaim(self.Aimer.getAngle())
+        #    self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
 
     def teleopInit(self):
+        NetworkTables.initialize()
+        self.sd = NetworkTables.getTable('VISION')
+       # self.sd = NetworkTables.getTable('VISION')
         self.gameData = ""
         self.goal = ""
         self.turnedAmount = 0
@@ -359,16 +397,20 @@ class Robot(wpilib.TimedRobot):
         self.climbWinchUpdate()
         self.shiftGears()
 
-        if self.operator.getRawAxis(4):
+        if self.operator.getRawAxis(4) > 0.8:
             self.visionShooterUpdate()
         
+        
+        loaderSpeed = 0
+        shooterRPM = 0
 
         if self.operator.getAButton():
-            loaderSpeed = robotmap.LOADER_SPEED
-            if self.operator.getBButton():
-                shooterRPM = robotmap.SHOOTER_RPM
-            else:
-                shooterRPM = 0
+            shooterRPM = robotmap.SHOOTER_RPM 
+        else:
+            shooterRPM = 0
+        
+        if self.operator.getAButton() and self.operator.getBButton():
+            loaderSpeed = robotmap.LOADER_SPEED 
         else:
             loaderSpeed = 0
 
