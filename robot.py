@@ -110,17 +110,21 @@ class Robot(wpilib.TimedRobot):
     def autonomousInit(self):
         self.gameData = ""
         self.autonTimer = wpilib.Timer()
-        
+        self.shooterTimer = wpilib.Timer()
+
+        self.autonTimer.start()
+
         self.Aimer.reset()
 
-        self.Aimer.setaim(self.Aimer.getAngle())
+        #self.Aimer.setaim(self.Aimer.getAngle())
         self.turned180 = False
 
         self.setTarget = False
 
-        self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+        #
+        self.Aimer.setaim(self.Aimer.getAngle())
 
-
+    """
     def rotateToPoint(self):
         val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
         #print(val)
@@ -130,25 +134,48 @@ class Robot(wpilib.TimedRobot):
             self.drivetrain.arcadeDrive(0,0)
             return True
 
-
+    """
 
 
     def autonomousPeriodic(self):
         
-        amt = self.Aimer.calculate(self.Aimer.getAngle())
+        lspeed = 0
+
+        if self.autonTimer.get() < 0.5:
+            self.drivetrain.arcadeDrive(-0.75, 0)
+        else:
+            amt = self.Aimer.calculate(self.Aimer.getAngle())
+            print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
+            self.drivetrain.arcadeDrive(0, amt)
+
+            if(abs(amt) < 1):
+                if not self.turned180:
+                    self.turned180 = True
+                    self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+                else:
+                    #self.Aimer.setAim(self.)
+                    self.shooterTimer.start()
+                
+
+        if self.shooterTimer.get() > 2:
+            lspeed = robotmap.LOADER_SPEED
+        
+        
+        self.shooter.setShooterSpeed(lspeed, robotmap.SHOOTER_RPM)
+
+
+        
         #Move forward for 1 second
-        #if self.autonTimer.get() < 1:
-        #    self.drivetrain.arcadeDrive(-0.75, 0)
+        #
         #else:
         #Rotate 180, then rotate to target
-        print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
-        self.drivetrain.arcadeDrive(0, -1 * amt)
+        #
+        
 
-        if(abs(amt) < 1):
-            self.autonTimer.start()
+        #if(abs(amt) < 1):
+        #    self.autonTimer.start()
             
-        if self.autonTimer.get() > 0.2:
-            self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
+        
         #if amt == 0:
         #    self.turned180 = True
         #    if not self.setTarget:
