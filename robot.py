@@ -3,7 +3,7 @@ from wpilib.interfaces import GenericHID
 
 import rev
 from rev.color import ColorMatch
-
+from wpilib import SmartDashboard
 
 #TODO: What else will we need for 2020?
 #TODO: Create and import subsystems (shooter, climb, etc.)
@@ -85,6 +85,15 @@ class Robot(wpilib.TimedRobot):
         #network tables
         self.sd = NetworkTables.getTable('VISION')
         
+        SmartDashboard.init()
+
+        self.lookForTargetTurn = [90, -180, 90]
+        self.lookForTargetIncrement = 0
+
+        #self.shuffleboardAutonDelayGetter = NetworkTables.get
+
+
+        
         
 
 
@@ -112,10 +121,14 @@ class Robot(wpilib.TimedRobot):
         self.gameData = ""
         self.autonTimer = wpilib.Timer()
         self.shooterTimer = wpilib.Timer()
+        self.shooterTimer2 = wpilib.Timer()
 
         self.autonTimer.start()
 
         self.Aimer.reset()
+
+        self.delayTimer = wpilib.Timer()
+        self.delayTimer.start()
 
         #self.Aimer.setaim(self.Aimer.getAngle())
         self.turned180 = False
@@ -125,86 +138,81 @@ class Robot(wpilib.TimedRobot):
         #
         self.Aimer.setaim(self.Aimer.getAngle())
 
+        self.autonDelay = SmartDashboard.getNumber("Auton Delay", 0)
+        
+
     """
     def rotateToPoint(self):
         val = (self.Aimer.getAngle()-self.Aimer.getsetpoint())
         #print(val)
         if val > 6 or val < -6:
-            self.drivetrain.arcadeDrive(0, 0.7)
-        else:
-            self.drivetrain.arcadeDrive(0,0)
+           self.drivetrain.arcadeDrive(0, 0.7)
+        elrcadeDrive(0,0)
             return True
 
     """
 
+    def lookUntilTargetFound(self):
+        if self.sd.getNumber("CONTOURS_FOUND", 0) > 0:
+            return True
+        else:
+            #if self.hasTurned90:
+            #    self.Aimer.setaim(self.Aimer.getAngle() - 180)
+            #else:
+            #    self.Aimer.setaim(self.Aimer.getAngle() + 90)
+            self.Aimer.setaim(self.Aimer.getAngle() + self.lookForTargetTurn[self.lookForTargetIncrement])
+
+
+        amt = self.Aimer.calculate(self.Aimer.getAngle())
+        self.drivetrain.arcadeDrive(0, amt)
+
+        if abs(amt) < 0.1:
+            if self.lookForTargetIncrement < 2:
+                self.lookForTargetIncrement += 1
+            else:
+                self.lookForTargetIncrement = 0
+
+        return False
+        
+
+
+    
+    def visionShooterUpdate(self):
+        amt = self.Aimer.calculate(self.Aimer.getAngle())
+        print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
+        self.drivetrain.arcadeDrive(0, amt)
+
+        if abs(amt) < 1:
+            if not self.turned180:
+                self.turned180 = True
+                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
+            else:
+                #self.Aimer.setAim(self.)
+                self.shooterTimer.start()
 
     def autonomousPeriodic(self):
         
         lspeed = 0
 
-        if self.autonTimer.get() < 0.5:
-            self.drivetrain.arcadeDrive(-0.75, 0)
-        else:
-            amt = self.Aimer.calculate(self.Aimer.getAngle())
-            print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
-            self.drivetrain.arcadeDrive(0, amt)
+        if self.delayTimer.get() > self.autonDelay:
+            if self.autonTimer.get() < 0.4 + self.autonDelay:
+                self.drivetrain.arcadeDrive(0.75, 0)
+            else:
+                #if self.lookUntilTargetFound():
+                self.visionShooterUpdate()
 
-            if(abs(amt) < 1):
-                if not self.turned180:
-                    self.turned180 = True
-                    self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
-                else:
-                    #self.Aimer.setAim(self.)
-                    self.shooterTimer.start()
-                
+        #if self.shooterTimer.get() > 0.1:
+        #    self.shooterTimer2.start()
+        #    if self.shooterTimer2.get() < 0.5:
+        #        self.drivetrain.arcadeDrive(-0.8, 0)
 
-        if self.shooterTimer.get() > 2:
+
+        if self.shooterTimer2.get() > 2:
             lspeed = robotmap.LOADER_SPEED
         
         
         self.shooter.setShooterSpeed(lspeed, robotmap.SHOOTER_RPM)
 
-
-        
-        #Move forward for 1 second
-        #
-        #else:
-        #Rotate 180, then rotate to target
-        #
-        
-
-        #if(abs(amt) < 1):
-        #    self.autonTimer.start()
-            
-        
-        #if amt == 0:
-        #    self.turned180 = True
-        #    if not self.setTarget:
-        #        self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
-        #        self.setTarget = True
-        #    else:
-        #        self.Aimer.setaim(self.Aimer.getAngle())
-        #        
-                
-                
-            
-                
-            
-                
-                    
-            
-        """if self.rotateToPoint():
-            if not self.foundTarget:
-                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
-                print(self.sd.getNumber("ANGLE", 0))
-                self.foundTarget = True
-            
-            #self.Aimer.setaim(self.Aimer.getAngle())
-            #self.foundTarget = True
-        """
-        #if self.foundTarget:
-        #    self.Aimer.setaim(self.Aimer.getAngle())
-        #    self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
 
     def teleopInit(self):
         NetworkTables.initialize()
@@ -233,6 +241,8 @@ class Robot(wpilib.TimedRobot):
 
         #TODO: Add encoders, other sensors
         self.hasTurnedWheel = False
+
+        self.autonDelay = SmartDashboard.getNumber("Auton Delay", 0)
 
 
     def debugColorSensor(self, color=None):
@@ -367,14 +377,14 @@ class Robot(wpilib.TimedRobot):
                 self.gearshiftPosition = "Low"
                 #print("Shifted to low gear")
 
-    def visionShooterUpdate(self):
-        """
+    """
+        
         If whammy is pressed, do the following steps:
         aim at target
         run convayer to bring in 1 ball
         calculate speed?
         shoot
-        """
+        
         loaderSpeed = 0
         shooterRPM  = 0
 
@@ -392,12 +402,14 @@ class Robot(wpilib.TimedRobot):
             shooterRPM = robotmap.SHOOTER_RPM
             
         self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
-        
+    """
 
     def teleopPeriodic(self):
+        print(SmartDashboard.getNumber("Auton Delay", 0))
+
         forward = self.driver.getY(RIGHT_HAND) 
         #Right stick y-axis
-        forward = 0.80 * deadzone(forward, robotmap.deadzone)
+        forward = 0.90 * deadzone(forward, robotmap.deadzone)
         rotation_value = -0.8 * self.driver.getX(LEFT_HAND)
         
         #if rotation_value > 0 or forward > 0:
@@ -427,9 +439,12 @@ class Robot(wpilib.TimedRobot):
         self.climbWinchUpdate()
         self.shiftGears()
 
-        if self.operator.getRawAxis(4) > 0.8:
-            self.visionShooterUpdate()
+        #if self.operator.getRawAxis(4) > 0.8:
+        #    self.visionShooterUpdate()
         
+        if self.operator.getYButton():
+            self.Aimer.setaim(self.sd.getNumber("ANGLE", 0))
+            self.visionShooterUpdate()
         
         loaderSpeed = 0
         shooterRPM = 0
