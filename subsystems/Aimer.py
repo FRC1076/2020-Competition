@@ -3,8 +3,8 @@ import wpilib
 import wpilib.controller
 import math
 
-kP = 0.03
-kI = 0.00
+kP = 0.05
+kI = 0.02
 kD = 0.00
 kF = 0.00
 kToleranceDegrees = 2.0
@@ -37,6 +37,9 @@ class Aimer:
     
     def getsetpoint(self):
         return self.setpoint
+
+    def calculate(self, m):
+        return self.turncontroller.calculate(m)
 
     def pidWrite(self, output):
         """This function is invoked periodically by the PID Controller,

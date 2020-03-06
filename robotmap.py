@@ -1,7 +1,7 @@
 deadzone = 0.2
 
 LOADER_SPEED = 1
-SHOOTER_RPM = 500
+SHOOTER_RPM = 750
 
 #Motor IDs
 LEFT_LEADER_ID = 8
