@@ -4,6 +4,7 @@ from wpilib.interfaces import GenericHID
 import rev
 from rev.color import ColorMatch
 
+
 #TODO: What else will we need for 2020?
 #TODO: Create and import subsystems (shooter, climb, etc.)
 
@@ -271,7 +272,7 @@ class Robot(wpilib.TimedRobot):
                 self.climberArmIsExtended = False
 
     def climbWinchUpdate(self):
-        if self.operator.getRawAxis(2) > 0.5 and self.driver.getBumper(RIGHT_HAND) > 0.8 :
+        if self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8 :
             self.climberWinchMotor1.set(0.75)
             self.climberWinchMotor2.set(0.75)
 
@@ -355,7 +356,7 @@ class Robot(wpilib.TimedRobot):
                     self.timer2 -= 1
 
     def shiftGears(self):
-        if self.driver.getStartButtonPressed():
+        if self.driver.getBumperPressed(RIGHT_HAND):
             if self.gearshiftPosition == "Low":
                 self.gearshiftPiston.retract()
                 self.gearshiftPosition = "High"
@@ -381,10 +382,11 @@ class Robot(wpilib.TimedRobot):
         self.Aimer.setaim(self.sd.getNumber("ANGLE", 0))
         
         turnAmount = self.Aimer.calculate(self.Aimer.getAngle())
+        print("The driver is turning: {}, to the angle of {}".format(turnAmount, self.sd.getNumber("ANGLE", 0 )))
         self.drivetrain.arcadeDrive(0, turnAmount)
 
 
-        if turnAmount == 0:
+        if abs(turnAmount) < 0.2:
             loaderSpeed = robotmap.LOADER_SPEED
             shooterRPM = robotmap.SHOOTER_RPM
             
@@ -394,8 +396,8 @@ class Robot(wpilib.TimedRobot):
     def teleopPeriodic(self):
         forward = self.driver.getY(RIGHT_HAND) 
         #Right stick y-axis
-        forward = 0.75 * deadzone(forward, robotmap.deadzone)
-        rotation_value = -0.7 * self.driver.getX(LEFT_HAND)
+        forward = 0.80 * deadzone(forward, robotmap.deadzone)
+        rotation_value = -0.8 * self.driver.getX(LEFT_HAND)
         
         #if rotation_value > 0 or forward > 0:
         self.drivetrain.arcadeDrive(forward, rotation_value)
