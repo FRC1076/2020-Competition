@@ -273,10 +273,11 @@ class Robot(wpilib.TimedRobot):
 
     def climbWinchUpdate(self):
         if self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8 :
+
             self.climberWinchMotor1.set(0.75)
             self.climberWinchMotor2.set(0.75)
 
-        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getStickButton(RIGHT_HAND) > 0.8:
+        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8:
             self.climberWinchMotor1.set(-0.3)
             self.climberWinchMotor2.set(-0.3)
         
