@@ -83,7 +83,7 @@ class Robot(wpilib.TimedRobot):
         self.Aimer = Aimer(self.ahrs)
         
         #network tables
-        NetworkTables.init()
+        #NetworkTables.init()
         self.sd = NetworkTables.getTable('VISION')
 
         SmartDashboard.init()
@@ -194,14 +194,14 @@ class Robot(wpilib.TimedRobot):
             if self.autonTimer.get() < 0.4 + self.autonDelay:
                 self.drivetrain.arcadeDrive(-0.75, 0)
             elif not self.set_point_set:
-                self.Aimer.setaim(self.sd.getNumber('ANGLE'))    #make default value 0
+                self.Aimer.setaim(self.sd.getNumber('ANGLE', 0))    #make default value 0
                 self.set_point_set = True
             elif not self.target_locked:
                 self.visionShooterUpdate()
             elif self.shooterTimer.get() < 1:
-                self.shooter.setShooterSpeed(0, robotmap.shooter_RPM)
+                self.shooter.setShooterSpeed(0, robotmap.SHOOTER_RPM)
             elif self.shooterTimer < 8:
-                self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.shooter_RPM)
+                self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
 
 
 

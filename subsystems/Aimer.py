@@ -19,7 +19,7 @@ class Aimer:
             kP, kI, kD
         )
         turnController.setTolerance(kToleranceDegrees)
-        turnController.enableContinuousInput(0, 360.0)
+        turnController.enableContinuousInput(-180, 180)
         self.turncontroller =turnController
         self.rotateToAngleRate = 0
 
@@ -31,7 +31,7 @@ class Aimer:
         self.turncontroller.setSetpoint(self.gyro.getAngle() + self.setpoint)
 
     def getAngle(self):
-        ag = abs(self.gyro.getAngle())%360
+        ag = self.gyro.getAngle()%180
         
         return ag
 
