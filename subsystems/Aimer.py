@@ -19,7 +19,7 @@ class Aimer:
             kP, kI, kD
         )
         turnController.setTolerance(kToleranceDegrees)
-        turnController.enableContinuousInput(-180.0, 180.0)
+        turnController.enableContinuousInput(0, 360.0)
         self.turncontroller =turnController
         self.rotateToAngleRate = 0
 
@@ -45,7 +45,8 @@ class Aimer:
         return self.turncontroller.calculate(m)
 
     def pidWrite(self, output):
-        """This function is invoked periodically by the PID Controller,
+        """
+        This function is invoked periodically by the PID Controller,
         based upon navX MXP yaw angle input and PID Coefficients.
         """
         self.rotateToAngleRate = output

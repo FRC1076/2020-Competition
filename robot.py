@@ -200,7 +200,7 @@ class Robot(wpilib.TimedRobot):
                 self.visionShooterUpdate()
             elif self.shooterTimer.get() < 1:
                 self.shooter.setShooterSpeed(0, robotmap.shooter_RPM)
-            else:
+            elif self.shooterTimer < 8:
                 self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.shooter_RPM)
 
 
