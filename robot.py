@@ -83,8 +83,9 @@ class Robot(wpilib.TimedRobot):
         self.Aimer = Aimer(self.ahrs)
         
         #network tables
+        NetworkTables.init()
         self.sd = NetworkTables.getTable('VISION')
-        
+
         SmartDashboard.init()
 
         self.lookForTargetTurn = [90, -180, 90]
@@ -127,8 +128,6 @@ class Robot(wpilib.TimedRobot):
 
         self.Aimer.reset()
 
-        self.delayTimer = wpilib.Timer()
-        self.delayTimer.start()
 
         #self.Aimer.setaim(self.Aimer.getAngle())
         self.turned180 = False
@@ -136,10 +135,11 @@ class Robot(wpilib.TimedRobot):
         self.setTarget = False
 
         #
-        self.Aimer.setaim(self.Aimer.getAngle())
+        #self.Aimer.setaim(self.Aimer.getAngle())
 
         self.autonDelay = SmartDashboard.getNumber("Auton Delay", 0)
-        
+        self.target_locked = False
+        self.set_point_set = False
 
     """
     def rotateToPoint(self):
@@ -178,29 +178,28 @@ class Robot(wpilib.TimedRobot):
 
     
     def visionShooterUpdate(self):
-        amt = self.Aimer.calculate(self.Aimer.getAngle())
-        print("Turn speed: {} Angle Difference: {}".format(amt, self.sd.getNumber("ANGLE", 0)))
-        self.drivetrain.arcadeDrive(0, amt)
+        angle = self.Aimer.getAngle()
+        rotate_speed = self.Aimer.calculate(angle)
+        self.drivetrain.arcadeDrive(0, rotate_speed)
 
-        if abs(amt) < 1:
-            if not self.turned180:
-                self.turned180 = True
-                self.Aimer.setaim(self.Aimer.getAngle() + self.sd.getNumber("ANGLE", 0))
-            else:
-                #self.Aimer.setAim(self.)
-                self.shooterTimer.start()
+        if self.Aimer.atSetpoint():
+            self.target_locked = True
 
     def autonomousPeriodic(self):
         
         lspeed = 0
 
-        if self.delayTimer.get() > self.autonDelay:
+        if self.autonTimer.get() > self.autonDelay:
             if self.autonTimer.get() < 0.4 + self.autonDelay:
-                self.drivetrain.arcadeDrive(0.75, 0)
-            else:
-                #if self.lookUntilTargetFound():
+                self.drivetrain.arcadeDrive(-0.75, 0)
+            elif not self.set_point_set:
+                self.Aimer.setaim(self.sd.getNumber('ANGLE'))
+                self.set_point_set = True
+            elif not self.target_locked:
                 self.visionShooterUpdate()
-
+            else:
+                self.shooter.setShooterSpeed(robotmap.)
+        
         #if self.shooterTimer.get() > 0.1:
         #    self.shooterTimer2.start()
         #    if self.shooterTimer2.get() < 0.5:

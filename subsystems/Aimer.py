@@ -27,13 +27,16 @@ class Aimer:
         self.gyro.reset()
 
     def setaim(self,setpoint):
-        self.setpoint=setpoint
-        self.turncontroller.setSetpoint(self.gyro.getAngle()+self.setpoint)
+        self.setpoint= setpoint
+        self.turncontroller.setSetpoint(self.gyro.getAngle() + self.setpoint)
 
     def getAngle(self):
-        self.ag=abs(self.gyro.getAngle())%360
+        ag = abs(self.gyro.getAngle())%360
         
-        return self.ag
+        return ag
+
+    def atSetpoint(self):
+        return self.turncontroller.atSetpoint()
     
     def getsetpoint(self):
         return self.setpoint
