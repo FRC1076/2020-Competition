@@ -3,7 +3,8 @@ import wpilib
 import wpilib.controller
 import math
 
-kP = 0.1
+
+kP = 0.03
 kI = 0.02
 kD = 0.00
 kF = 0.00

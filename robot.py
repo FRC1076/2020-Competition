@@ -188,20 +188,11 @@ class Robot(wpilib.TimedRobot):
             self.shooterTimer.start()
 
     def autonomousPeriodic(self):
-        
-
-        if self.autonTimer.get() > self.autonDelay:
-            if self.autonTimer.get() < 0.4 + self.autonDelay:
-                self.drivetrain.arcadeDrive(-0.75, 0)
-            elif not self.set_point_set:
-                self.Aimer.setaim(self.sd.getNumber('ANGLE', 0))    #make default value 0
-                self.set_point_set = True
-            elif not self.target_locked:
-                self.visionShooterUpdate()
-            elif self.shooterTimer.get() < 1:
-                self.shooter.setShooterSpeed(0, robotmap.SHOOTER_RPM)
-            elif self.shooterTimer < 8:
-                self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM)
+        if self.autonTimer.get() < 8:
+            self.shooter.setShooterSpeed(robotmap.LOADER_SPEED, robotmap.SHOOTER_RPM) 
+        else:
+            self.shooter.setShooterSpeed(0, 0)
+            self.drivetrain.arcadeDrive(0.50, 0)
 
 
 
@@ -279,7 +270,7 @@ class Robot(wpilib.TimedRobot):
             self.climberWinchMotor1.set(0.75)
             self.climberWinchMotor2.set(0.75)
 
-        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8:
+        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getBumperPressed(RIGHT_HAND):
             self.climberWinchMotor1.set(-0.3)
             self.climberWinchMotor2.set(-0.3)
         
@@ -359,7 +350,7 @@ class Robot(wpilib.TimedRobot):
                     self.timer2 -= 1
 
     def shiftGears(self):
-        if self.driver.getBumperPressed(RIGHT_HAND):
+        if self.driver.getBumperPressed(RIGHT_HAND) and self.operator.getRawAxis(2) < 0.5:
             if self.gearshiftPosition == "Low":
                 self.gearshiftPiston.retract()
                 self.gearshiftPosition = "High"
