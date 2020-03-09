@@ -18,6 +18,7 @@ from subsystems.color_sensor import color_sensor
 from subsystems.shooter import shooter
 from subsystems.Aimer import Aimer
 from subsystems.drivetrain import Drivetrain
+from subsystems.climber import Climber
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
@@ -47,12 +48,11 @@ class Robot(wpilib.TimedRobot):
         
         #Pneumatics
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND, robotmap.COLOR_SENSOR_RETRACT))
-        self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.CLIMBER_EXTEND, robotmap.CLIMBER_RETRACT))
+       
         self.gearshiftPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.DRIVE_SHIFT_EXTEND, robotmap.DRIVE_SHIFT_RETRACT))
     
         #Climber
-        self.climberWinchMotor1 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR1, rev.MotorType.kBrushed)
-        self.climberWinchMotor2 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR2, rev.MotorType.kBrushed)
+        self.climber = Climber()
 
         #Drivetrain
         self.drivetrain = Drivetrain(self.left_side, self.right_side, self.gearshiftPiston)
@@ -149,47 +149,8 @@ class Robot(wpilib.TimedRobot):
 
 
     def colorPistonUpdate(self):
-        if self.operator.getPOV() == 180:
-            self.colorPiston.extend()
-        elif self.operator.getPOV() == 0:
-            self.colorPiston.retract()
-
-
-    def climberPistonUpdate(self):  
-        if self.operator.getRawAxis(2) > 0.5 and self.driver.getBumperPressed(LEFT_HAND):
-            if not self.climberArmIsExtended:
-                print("extend")
-                self.climberPiston.extend()
-                self.climberArmIsExtended = True
-        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
-            if self.climberArmIsExtended:
-                self.climberPiston.retract()
-                self.climberArmIsExtended = False
-
-    def climbWinchUpdate(self):
-        if self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8 :
-
-            self.climberWinchMotor1.set(0.75)
-            self.climberWinchMotor2.set(0.75)
-
-        elif self.operator.getRawAxis(2) > 0.5 and self.driver.getTriggerAxis(RIGHT_HAND) > 0.8:
-            self.climberWinchMotor1.set(-0.3)
-            self.climberWinchMotor2.set(-0.3)
         
-        else:
-            self.climberWinchMotor1.set(0)
-            self.climberWinchMotor2.set(0)
-    
-
-    def shiftGears(self):
         
-            if self.gearshiftPosition == "Low":
-                self.gearshiftPiston.retract()
-                self.gearshiftPosition = "High"
-            else:
-                self.gearshiftPiston.extend()
-                self.gearshiftPosition = "Low"
-
 
     def visionShooterUpdate(self):
         """
@@ -218,6 +179,9 @@ class Robot(wpilib.TimedRobot):
         self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
         
 
+    def isOperatorEndGame(self):
+        return self.operator.getRawAxis(2) > 0.5
+
     def teleopPeriodic(self):
 
         forward = 0.8 * self.drivetrain.deadzone(self.driver.getY(RIGHT_HAND))
@@ -237,12 +201,24 @@ class Robot(wpilib.TimedRobot):
 
         if self.driver.getBumperPressed(RIGHT_HAND):
             self.drivetrain.shift()
-        
 
-        self.colorPistonUpdate()
-        self.climberPistonUpdate()
-        self.climbWinchUpdate()
-        self.shiftGears()
+
+        if self.isOperatorEndGame():
+            if self.driver.getBumperPressed(LEFT_HAND):
+                self.climber.extendPiston()
+            elif self.driver.getTriggerAxis(LEFT_HAND) > 0.8:
+                self.climber.retractPiston()
+
+            if self.driver.getTriggerAxis(RIGHT_HAND) > 0.8:
+                self.climber.setMotor(robotmap.CLIMBER_MOTOR_UP_SPEED)
+            else:
+                self.climber.setMotor(0)
+
+
+        if self.operator.getPOV() == 180:
+            self.colorPiston.extend()
+        elif self.operator.getPOV() == 0:
+            self.colorPiston.retract()
 
         if self.operator.getRawAxis(4) > 0.8:
             self.visionShooterUpdate()
