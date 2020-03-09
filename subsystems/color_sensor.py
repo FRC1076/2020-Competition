@@ -50,7 +50,6 @@ class color_sensor:
         red = color.red
         blue = color.blue
         green = color.green
-        # TODO: Use better debugging tools
         print("Red: {} Green: {} Blue: {} ".format(red, green, blue))
 
 
@@ -61,11 +60,6 @@ class color_sensor:
 
 
     def getColorName(self, color):
-        """
-        TODO: improve color accuracy
-
-        """
-
         r = color.red
         g = color.green
         b = color.blue
@@ -95,7 +89,6 @@ class color_sensor:
 
     
     def turnWheelCycle(self):
-        #self.debugColorSensor()
         self.colorSensorMotor.set(0.3)
         self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
         
@@ -117,7 +110,6 @@ class color_sensor:
             self.lastColor = None
             self.goal = self.stopColorMap[self.gameData]
             self.goal = self.stopColorMap[self.goal]
-            #self.goal = self.gameData
             self.searchForColor = True
             self.found = False
             self.timer = 0
@@ -163,14 +155,11 @@ class color_sensor:
                 self.colorSensorMotor.set(0.2)
 
             else:
-
                 if self.timer2 == 0:
-                    print("STOP!!!!")    
                     self.colorSensorMotor.set(0)
                     self.searchForColor = False
                 else:
                     self.timer2 -= 1
-
 
     def getWPIColor(self):
         return self.colorSensor.getColor()
