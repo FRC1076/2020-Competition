@@ -2,7 +2,12 @@ import socket
 import time
 
 class lights:
-    def __init__(self, local_ip, ip_address, port):
+    def __init__(self, local_ip='10.10.76.2', ip_address='10.10.76.7', port=8777):
+        """
+	Create the lights client listening on local_ip,port
+	Set it up to send commands to ip_address,port
+	Defaults work fine with example sketch.   Change for testing, etc...
+        """
         self.ip = ip_address
         self.port = port
         self.send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
