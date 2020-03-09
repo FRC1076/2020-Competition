@@ -126,6 +126,18 @@ class color_sensor:
         else:
             self.searchColorCycle()
         
+    
+    def manual_turn(self, speed):
+        self.colorSensorMotor.set(speed)
+
+
+    def stop_turn(self):
+        if not self.searchForColor and not self.turnWheel:
+            self.colorSensorMotor.set(0)
+            return True
+        else:
+            return False
+
 
     def searchColorCycle(self):
         if self.timer < 100:

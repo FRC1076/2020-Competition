@@ -1,26 +1,23 @@
-import wpilib
-from wpilib.interfaces import GenericHID
 
+# General PYFRC Imports
+import wpilib
+import wpilib.drive
+from wpilib.interfaces import GenericHID
 import rev
 from rev.color import ColorMatch
+from navx import AHRS
+from networktables import NetworkTables
+import threading
 
-
-#TODO: What else will we need for 2020?
-#TODO: Create and import subsystems (shooter, climb, etc.)
-
-#This year, all IDs are stored in the robotmap
+# All ports are stored in robot map
 import robotmap
 
-#Subsystems
+# Subsystems
 from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
 from subsystems.shooter import shooter
-import rev
-import wpilib.drive
 from subsystems.Aimer import Aimer
-from navx import AHRS
-import threading
-from networktables import NetworkTables
+from subsystems.drivetrain import Drivetrain
 
 #Controller hands (sides)
 LEFT_HAND = wpilib._wpilib.XboxController.Hand.kLeftHand
@@ -48,16 +45,17 @@ class Robot(wpilib.TimedRobot):
         self.left_side = wpilib.SpeedControllerGroup(self.left_motor_1, self.left_motor_2)
         self.right_side = wpilib.SpeedControllerGroup(self.right_motor_1, self.right_motor_2)
         
-        #Drivetrain
-        self.drivetrain = wpilib.drive.DifferentialDrive(self.left_side, self.right_side)
-        
         #Pneumatics
         self.colorPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.COLOR_SENSOR_EXTEND, robotmap.COLOR_SENSOR_RETRACT))
         self.climberPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.CLIMBER_EXTEND, robotmap.CLIMBER_RETRACT))
         self.gearshiftPiston = pneumatic_system(wpilib.DoubleSolenoid(0, robotmap.DRIVE_SHIFT_EXTEND, robotmap.DRIVE_SHIFT_RETRACT))
-        
+    
+        #Climber
         self.climberWinchMotor1 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR1, rev.MotorType.kBrushed)
         self.climberWinchMotor2 = rev.CANSparkMax(robotmap.CLIMBER_WINCH_MOTOR2, rev.MotorType.kBrushed)
+
+        #Drivetrain
+        self.drivetrain = Drivetrain(self.left_side, self.right_side, self.gearshiftPiston)
 
         # Color Sensor
         self.colorSensor = color_sensor()
@@ -184,7 +182,7 @@ class Robot(wpilib.TimedRobot):
     
 
     def shiftGears(self):
-        if self.driver.getBumperPressed(RIGHT_HAND):
+        
             if self.gearshiftPosition == "Low":
                 self.gearshiftPiston.retract()
                 self.gearshiftPosition = "High"
@@ -234,9 +232,13 @@ class Robot(wpilib.TimedRobot):
             self.colorSensor.colorWheelCycle()
             
         if self.operator.getBackButton():
-            self.colorSensorMotor.set(0.2)
-        elif not self.searchForColor and not self.turnWheel:
-            self.colorSensorMotor.set(0)
+            self.colorSensor.manual_turn(robotmap.COLOR_WHEEL_TURN_SPEED)
+        else:
+            self.colorSensor.stop()
+
+        if self.driver.getBumperPressed(RIGHT_HAND):
+            self.drivetrain.shift()
+        
 
         self.colorPistonUpdate()
         self.climberPistonUpdate()

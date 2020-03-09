@@ -18,13 +18,3 @@ class pneumatic_system:
 
     def get(self):
         self.piston.get()
-
-
-        ''' SOLENOID LIST
-            COLOR SENSOR WHEEL: 4, 5
-
-
-
-
-        Define Code: self.piston = pneuamtic_system(wpilib.DoubleSolenoid(PNCANID, RFForward, RFReverse))
-        '''
