@@ -15,7 +15,7 @@ class Drivetrain:
         self.drive.arcadeDrive(forward, rotate)
 
     def shift(self):
-        if self.gearshiftPosition == "Low":
+        if self.gearPos == "Low":
             self.gear_shift.retract()
             self.gearPos = "High"
         else:
