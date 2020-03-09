@@ -219,9 +219,8 @@ class Robot(wpilib.TimedRobot):
         
 
     def teleopPeriodic(self):
-        forward = self.driver.getY(RIGHT_HAND) 
 
-        forward = 0.80 * deadzone(forward, robotmap.deadzone)
+        forward = 0.8 * self.drivetrain.deadzone(self.driver.getY(RIGHT_HAND))
         rotation_value = -0.8 * self.driver.getX(LEFT_HAND)
         
         self.drivetrain.arcadeDrive(forward, rotation_value)
@@ -264,23 +263,6 @@ class Robot(wpilib.TimedRobot):
 
         
         self.shooter.setShooterSpeed(loaderSpeed, shooterRPM)
-
-
-
-def deadzone(val, deadzone): 
-    """
-    Given the deadzone value x, the deadzone both eliminates all
-    values between -x and x, and scales the remaining values from
-    -1 to 1, to (-1 + x) to (1 - x)
-    """
-    if abs(val) < deadzone:
-        return 0
-    elif val < (0):
-        x = ((abs(val) - deadzone)/(1-deadzone))
-        return (-x)
-    else:
-        x = ((val - deadzone)/(1-deadzone))
-        return (x)
 
 
 if __name__ == "__main__":
