@@ -11,4 +11,4 @@ install:
    
 # command to run tests
 script:
-- python3 /tests/drivetrain_test.py
+- python3 /FRC1076/2020-Competition/tests/drivetrain_test.py
