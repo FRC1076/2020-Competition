@@ -6,17 +6,14 @@ before_install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -q update
   - sudo apt-get -y install gcc-4.9 g++-4.9
-  - sudo apt-get -y - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9 install gcc-4.9 g++-4.9
-
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
 install:
   - pip install -U pip
   - python3 -m pip install --no-use-pep517 robotpy_build 
   - pip3 install --find-links https://www.tortall.net/~robotpy/wheels/2020/linux_x86_64/ pyfrc
   - pip3 install --find-links https://www.tortall.net/~robotpy/wheels/2020/linux_x86_64/ robotpy-rev
   - pip3 install --find-links https://www.tortall.net/~robotpy/wheels/2020/linux_x86_64/ robotpy-rev-color
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install gcc-4.9 g++-4.9
+  
    
 # command to run tests
 script:
