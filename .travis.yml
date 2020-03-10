@@ -3,7 +3,10 @@ python:
   - "3.8"
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install -U pip
+  - pip install pyfrc==2020.0.2
+  - pip install robotpy-rev==2020.1.04 robotpy-rev-color
+   
 # command to run tests
 script:
 - py -3 /tests/drivetrain_test.py
