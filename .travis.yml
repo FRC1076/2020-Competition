@@ -4,7 +4,7 @@ python:
 # command to install dependencies
 install:
   - pip install -U pip
-  - pip install wheel pyfrc
+  - pip install pyfrc==2020.0.2
   - pip install robotpy-rev==2020.1.04 robotpy-rev-color
    
 # command to run tests
