@@ -3,7 +3,7 @@ python:
   - "3.8"
 # command to install dependencies
 install:
-  - pip install robotpy-rev --no-binary
+  - pip install --no-binary robotpy-rev 
   - pip install -r requirements.txt 
 # command to run tests
 script:
