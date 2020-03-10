@@ -15,6 +15,7 @@ import robotmap
 from subsystems.pneumatics_system import pneumatic_system
 from subsystems.color_sensor import color_sensor
 from subsystems.shooter import shooter
+from subsystems.lights import lights
 import rev
 import wpilib.drive
 from subsystems.Aimer import Aimer
@@ -84,6 +85,9 @@ class Robot(wpilib.TimedRobot):
         
         #network tables
         self.sd = NetworkTables.getTable('VISION')
+
+        #Lights
+        self.lights = lights()
         
         
 
@@ -164,6 +168,7 @@ class Robot(wpilib.TimedRobot):
         
         self.shooter.setShooterSpeed(lspeed, robotmap.SHOOTER_RPM)
 
+        self.lights.indicate_target(self.Aimer.getAngle())
 
         
         #Move forward for 1 second
@@ -429,13 +434,15 @@ class Robot(wpilib.TimedRobot):
 
         if self.operator.getRawAxis(4) > 0.8:
             self.visionShooterUpdate()
+            self.lights.indicate_target(self.Aimer.getAngle())
         
         
         loaderSpeed = 0
         shooterRPM = 0
 
         if self.operator.getAButton():
-            shooterRPM = robotmap.SHOOTER_RPM 
+            shooterRPM = robotmap.SHOOTER_RPM
+            self.lights.indicate_target(self.Aimer.getAngle()) 
         else:
             shooterRPM = 0
         
