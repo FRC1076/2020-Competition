@@ -145,12 +145,6 @@ class Robot(wpilib.TimedRobot):
         self.hasTurnedWheel = False
 
 
-    
-
-
-    def colorPistonUpdate(self):
-        
-        
 
     def visionShooterUpdate(self):
         """

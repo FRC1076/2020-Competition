@@ -2,6 +2,8 @@ import wpilib
 from rev.color import ColorSensorV3
 import rev
 import robotmap
+import rev.color
+from rev.color import ColorMatch
 
 class color_sensor:
     def __init__(self):
