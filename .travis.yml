@@ -6,7 +6,7 @@ install:
   - pip install -U pip
   - python3 -m pip install --no-use-pep517 robotpy_build 
   - pip3 install --find-links https://www.tortall.net/~robotpy/wheels/2020/linux_x86_64/ pyfrc
-  - pip install robotpy-rev==2020.1.04 robotpy-rev-color
+  - pip install robotpy-rev robotpy-rev-color
    
 # command to run tests
 script:
