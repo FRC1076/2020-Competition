@@ -4,7 +4,7 @@ python:
 # command to install dependencies
 install:
   - pip install -U pip
-  - python3 -m pip install --no-use-pep517 --no-binary pyfrc pyfrc
+  - python3 -m pip install --no-use-pep517 robotpy_build pyfrc
   - pip install robotpy-rev==2020.1.04 robotpy-rev-color
    
 # command to run tests
