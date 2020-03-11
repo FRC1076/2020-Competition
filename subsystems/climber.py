@@ -7,7 +7,6 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
 from subsystems.pneumatics_system import pneumatic_system
 
-
 class Climber:
 
     def __init__(self):
@@ -24,7 +23,7 @@ class Climber:
         self.piston.extend()
 
     def retractPiston(self):
-        self.pistion.retract()
+        self.piston.retract()
 
     def setMotor(self, speed):
         self.whinch.set(speed)

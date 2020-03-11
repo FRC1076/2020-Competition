@@ -191,7 +191,7 @@ class Robot(wpilib.TimedRobot):
         if self.operator.getBackButton():
             self.colorSensor.manual_turn(robotmap.COLOR_WHEEL_TURN_SPEED)
         else:
-            self.colorSensor.stop()
+            self.colorSensor.stop_turn()
 
         if self.driver.getBumperPressed(RIGHT_HAND):
             self.drivetrain.shift()
