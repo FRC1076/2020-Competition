@@ -2,6 +2,11 @@ import wpilib
 import robotmap
 import rev
 
+import os
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.sys.path.insert(0,parentdir) 
+from subsystems.pneumatics_system import pneumatic_system
+
 class Climber:
 
     def __init__(self):

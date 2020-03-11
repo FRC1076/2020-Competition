@@ -3,6 +3,8 @@ from rev.color import ColorSensorV3
 from rev.color import ColorMatch
 import rev
 import robotmap
+import rev.color
+from rev.color import ColorMatch
 
 class color_sensor:
     """
