@@ -19,10 +19,10 @@ class TestDrivetrain(unittest.TestCase):
         left_motor = rev.CANSparkMax(99, rev.MotorType.kBrushed)
         right_motor = rev.CANSparkMax(100, rev.MotorType.kBrushed)
         drivetrain = Drivetrain(left_motor, right_motor, None)
-        drivetrain.arcade_drive(0.5, 0)
+        drivetrain.arcadeDrive(0.5, 0)
         assert left_motor.get() > 0
         assert right_motor.get() < 0
-        drivetrain.arcade_drive(-0.5, 0)
+        drivetrain.arcadeDrive(-0.5, 0)
         assert left_motor.get() < 0
         assert right_motor.get() > 0
 
@@ -31,10 +31,10 @@ class TestDrivetrain(unittest.TestCase):
         left_motor = rev.CANSparkMax(99, rev.MotorType.kBrushed)
         right_motor = rev.CANSparkMax(100, rev.MotorType.kBrushed)
         drivetrain = Drivetrain(left_motor, right_motor, None)
-        drivetrain.arcade_drive(0, 0.42)
+        drivetrain.arcadeDrive(0, 0.42)
         assert left_motor.get() > 0
         assert right_motor.get() > 0
-        drivetrain.arcade_drive(0, -0.42)
+        drivetrain.arcadeDrive(0, -0.42)
         assert left_motor.get() < 0
         assert right_motor.get() < 0
 
