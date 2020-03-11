@@ -1,5 +1,6 @@
 import wpilib
 import robotmap
+import rev
 
 class Climber:
 
@@ -17,7 +18,7 @@ class Climber:
         self.piston.extend()
 
     def retractPiston(self):
-        self.pistion.retract()
+        self.piston.retract()
 
     def setMotor(self, speed):
         self.whinch.set(speed)

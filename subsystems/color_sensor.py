@@ -1,9 +1,16 @@
 import wpilib
 from rev.color import ColorSensorV3
+from rev.color import ColorMatch
 import rev
 import robotmap
 
 class color_sensor:
+    """
+    Creates a color sensor object using a Rev Color Sensor V3. It includes functions
+    to set the color wheel up with the correct colors, turn the control panel 4 times,
+    turn the control panel to be on a specific color, and recieve game data about the
+    color to turn to, among other functions.
+    """
     def __init__(self):
         self.colorSensor = ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.color = self.colorSensor.getRawColor()
@@ -20,7 +27,10 @@ class color_sensor:
 
 
 
-    def colorWheelCycle():
+    def colorWheelCycle(self):
+        """
+        Checks whether or not the robot has already rotated the control panel for stage 2.
+        """
         if not self.hasTurnedWheel:
             self.turnWheelInit()
         else:
@@ -29,6 +39,9 @@ class color_sensor:
         
 
     def setupColors(self):
+        """
+        Calibrates the color sensor based on the colors present on the control panel.
+        """
         self.colorMatch = ColorMatch()
         
         self.blue = wpilib._wpilib.Color(0.143, 0.427, 0.429)
@@ -45,6 +58,9 @@ class color_sensor:
 
 
     def debug(self, color=None):
+        """
+        Prints the RGB values that the color sensor is currently recieving.
+        """
         if color is not None:
             color = self.colorSensor.getColor()
         red = color.red
@@ -54,12 +70,20 @@ class color_sensor:
 
 
     def checkGameData(self):
+        """
+        Receives the game data from the FMS, used to learn what
+        color to turn to for stage 3.
+        """
         gd = wpilib.DriverStation.getInstance().getGameSpecificMessage()
         if(gd != None and not self.searchForColor):
             self.gameData = gd
 
 
     def getColorName(self, color):
+        """
+        Gets the name of the current color being sensed based on the
+        RGB values the sensor is returning.
+        """
         r = color.red
         g = color.green
         b = color.blue
@@ -76,6 +100,10 @@ class color_sensor:
             return "w"
 
     def turnWheelInit(self):
+        """
+        Initializes the robot to complete stage 2 of the control panel
+        (spinning it 4 times).
+        """
         if not self.turnedInit:
             self.turnedAmount = 8
             self.currentColor = None
@@ -89,6 +117,10 @@ class color_sensor:
 
     
     def turnWheelCycle(self):
+        """
+        Rotates the color wheel 4 times by checking that it passes the current
+        color 8 times.
+        """
         self.colorSensorMotor.set(0.3)
         self.currentColor = self.colorSensor.getColorName(self.colorSensor.getColor())
         
@@ -104,6 +136,10 @@ class color_sensor:
 
     
     def searchColorInit(self):
+        """
+        Initializes the robot to complete stage 3 of the control panel
+        (spinning it to a specific color).
+        """
         if not self.colorFindInit:
             self.colorSensor.colorSensor.setGain(rev.color._rev_color.ColorSensorV3.GainFactor.k18x)
             self.currentColor = None
@@ -120,10 +156,16 @@ class color_sensor:
         
     
     def manual_turn(self, speed):
+        """
+        Allows the operator to turn the control panel manually.
+        """
         self.colorSensorMotor.set(speed)
 
 
     def stop_turn(self):
+        """
+        Stops the control panel from turning while it shouldn't be.
+        """
         if not self.searchForColor and not self.turnWheel:
             self.colorSensorMotor.set(0)
             return True
@@ -132,6 +174,10 @@ class color_sensor:
 
 
     def searchColorCycle(self):
+        """
+        Rotates the control panel to the color specified by the FMS to
+        complete stage 3.
+        """
         if self.timer < 100:
             self.timer += 1
             self.colorSensorMotor.set(0.2)
@@ -161,10 +207,18 @@ class color_sensor:
                 else:
                     self.timer2 -= 1
 
+
     def getWPIColor(self):
+        """
+        Returns the color that the color sensor is currently detecting.
+        """
         return self.colorSensor.getColor()
 
+
     def getColor(self):
+        """
+        Returns the raw RGB values that the color sensor is currently detecting.
+        """
         self.color = self.colorSensor.getRawColor()
         return self.color
 
